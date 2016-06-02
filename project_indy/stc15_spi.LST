@@ -1,0 +1,78 @@
+C51 COMPILER V9.52.0.0   STC15_SPI                                                         06/02/2016 10:19:05 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_SPI
+OBJECT MODULE PLACED IN stc15_spi.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE stc15_spi.c LARGE BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include "stc15_spi.h"
+   2          
+   3          #define MASTER  // 如果作为主机则定义
+   4          sbit SPISS      =   P1^1;       //SPI从机选择口, 连接到其它MCU的SS口
+   5                                          //当SPI为一主多从模式时,请使用主机的普通IO口连接到从机的SS口
+   6          
+   7          
+   8          /************************************************
+   9          SPI初始化
+  10          入口参数: 无
+  11          出口参数: 无
+  12          ************************************************/
+  13          void InitSpi()
+  14          {
+  15   1      //  ACC = P_SW1;                                //切换到第一组SPI
+  16   1      //  ACC &= ~(SPI_S0 | SPI_S1);                  //SPI_S0=0 SPI_S1=0
+  17   1      //  P_SW1 = ACC;                                //(P1.2/SS, P1.3/MOSI, P1.4/MISO, P1.5/SCLK)
+  18   1      
+  19   1          ACC = P_SW1;                                //
+  20   1          ACC &= ~(SPI_S0 | SPI_S1);                  //SPI_S0=1 SPI_S1=0
+  21   1          ACC |= SPI_S0;                              //(P2.4/SS_2, P2.3/MOSI_2, P2.2/MISO_2, P2.1/SCLK_2)
+  22   1          P_SW1 = ACC;  
+  23   1      
+  24   1      //  ACC = P_SW1;                                //切换到第三组SPI
+  25   1      //  ACC &= ~(SPI_S0 | SPI_S1);                  //SPI_S0=0 SPI_S1=1
+  26   1      //  ACC |= SPI_S1;                              //(P5.4/SS_3, P4.0/MOSI_3, P4.1/MISO_3, P4.3/SCLK_3)
+  27   1      //  P_SW1 = ACC;  
+  28   1      
+  29   1        
+  30   1        SPDAT = 0;          //初始化SPI数据
+  31   1        SPSTAT = SPIF | WCOL;   //清除SPI状态位
+  32   1      #ifdef MASTER
+  33   1        SPCTL = SPEN | MSTR;    //主机模式
+  34   1      #else
+                SPCTL = SPEN;       //从机模式
+              #endif
+  37   1      
+  38   1      }
+  39          
+  40          
+  41          ///////////////////////////////////////////////////////////
+  42          
+  43          void spi_isr() interrupt 9 using 1     //SPI中断服务程序 9 (004BH)
+  44          {
+  45   1          SPSTAT = SPIF | WCOL;       //清除SPI状态位
+  46   1      #ifdef MASTER
+  47   1          SPISS = 1;                  //拉高从机的SS
+  48   1          //SendUart(SPDAT);            //返回SPI数据
+  49   1      #else                           //对于从机(从主机接收SPI数据,同时
+                  SPDAT = SPDAT;              //发送前一个SPI数据给主机)
+              #endif
+  52   1      }
+  53           
+
+
+C51 COMPILER V9.52.0.0   STC15_SPI                                                         06/02/2016 10:19:05 PAGE 2   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     24    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

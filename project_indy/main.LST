@@ -1,0 +1,356 @@
+C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c LARGE BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include "stc15_global.h"
+   2          #include "beep.h"   
+   3          #include "keyScan.h"
+   4          #include "power.h"
+   5          #include "ble.h"
+   6          #include "stdio.h"
+   7          #include "string.h"
+   8          #include "indy.h"
+   9          
+  10          struct RESULT result;
+  11          
+  12          int main()
+  13          {
+  14   1        unsigned char keyScanResult = 0;
+  15   1        unsigned char i = 0;
+  16   1        unsigned char j = 0;
+  17   1        double temp = 0;
+  18   1        unsigned char bat = 0;
+  19   1        // unsigned char tempStr[60];
+  20   1        
+  21   1        unsigned char fail_cnt = 0;
+  22   1        unsigned char send_times = 0;
+  23   1        unsigned char rec_flag = 0;
+  24   1        unsigned char rec_flag_cnt = 0;
+  25   1        
+  26   1        beep200msBZ();  // 上电提醒
+  27   1      
+  28   1        UartInit();   // Uart1 (for indy) //115200bps@22.1184MHz
+  29   1        Uart2Init();  // Uart2 (for BT)   //115200bps@22.1184MHz
+  30   1        Uart3Init();  //  115200bps@22.1184MHz
+  31   1        Uart4Init();  // Uart4 (for debug) //115200bps@22.1184MHz
+  32   1        
+  33   1        batteryInit();  // 初始化电源芯片
+  34   1        
+  35   1        InitOled();   // 初始化OLED
+  36   1        
+  37   1        OledPowerUp();    // 开启OLED
+  38   1      
+  39   1        ble_init(); // 默认透传模式
+  40   1        
+  41   1        //t0IntInit();  // t0初始化
+  42   1      
+  43   1      
+  44   1        OledFlush((unsigned char *)HM);
+  45   1        //OledWriteMessage57("ABCDEabcdefghijklmnopqrstuvwxyz BT TEST 0123456498751321");
+  46   1      
+  47   1        //OledWriteWordByHex57(3,0,'s');
+  48   1        //OledWriteMessageByHex57("hello world\n");
+  49   1        //OledWeakUpDownMode(9);  // 启动睡眠模式
+  50   1        /*
+  51   1        while(1){
+  52   1          Delay200ms();
+  53   1          SendData(0xff);
+  54   1          Delay200ms();
+  55   1          SendData(0x00);
+C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 2   
+
+  56   1          i = 0;
+  57   1          while(rec_num){
+  58   1            SendData(rec_data[i]);
+  59   1            i++;
+  60   1            rec_num--;
+  61   1          }
+  62   1        }*/
+  63   1        
+  64   1        
+  65   1        while(1)
+  66   1        {
+  67   2          Delay100ms();
+  68   2          keyScanResult = keyScan();
+  69   2          switch(keyScanResult)
+  70   2          {
+  71   3            case S1_TUCH:  
+  72   3              //OledExitingSleepMode();
+  73   3              OledWriteMessage57("exiting sleep mode");
+  74   3              break;
+  75   3            case S2_KEYP: 
+  76   3              break;
+  77   3            case S3_KEYM:         
+  78   3              OledWriteMessage57("entering sleep mode" );
+  79   3              //OledEnteringSleepMode();
+  80   3              break;
+  81   3            
+  82   3      
+  83   3           default:
+  84   3                break;
+  85   3          }  
+  86   2        }
+  87   1        
+  88   1        
+  89   1        
+  90   1        
+  91   1        // ------------------- indy ----------------------------------
+  92   1        //  WDT_CONTR |= 0X37;//使能看门狗。128分频，喂狗时间大约2.6S.
+  93   1      /*
+  94   1        clear_uart2_data();
+  95   1        clear_uart2_mes();
+  96   1        clear_rec_data();
+  97   1        clear();
+  98   1         //阅读器参数预设。预设过程中关闭串口2中断。预设完成后再打开。
+  99   1        index_send(1);
+ 100   1        
+ 101   1        Delay20ms();
+ 102   1       
+ 103   1        if(index_r_check(1) == 0)
+ 104   1        {
+ 105   1          WriteTestMessage57("connect OK ");
+ 106   1        }
+ 107   1        else
+ 108   1          WriteTestMessage57("connect error ");
+ 109   1        
+ 110   1        for(i = 1;i <= 33;i++)
+ 111   1        {
+ 112   1              clear_rec_data();
+ 113   1              index_send(i);
+ 114   1              Delay20ms();    
+ 115   1          }
+ 116   1        
+ 117   1        while(1)
+C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 3   
+
+ 118   1          { 
+ 119   1            Delay100ms();
+ 120   1            keyScanResult = keyScan();
+ 121   1            
+ 122   1              clear_uart2_mes();
+ 123   1            
+ 124   1                WriteMessageByHex57(rec_data);
+ 125   1              
+ 126   1            for(send_times=0;send_times<5;send_times++)
+ 127   1            {
+ 128   1              clear_rec_data();
+ 129   1                    switch(keyScanResult)
+ 130   1                    {
+ 131   1                        case 1:  
+ 132   1                            rec_flag=0;
+ 133   1                            indy_readtemp();//temp
+ 134   1                            break;
+ 135   1      
+ 136   1                        case 2: 
+ 137   1                            rec_flag=0;
+ 138   1                            indy_read_sensorcode();//sensor code
+ 139   1                            break;
+ 140   1      
+ 141   1                        case 3: 
+ 142   1                            rec_flag=0;
+ 143   1                            indy_readrssi();//rssi
+ 144   1                            break;
+ 145   1      
+ 146   1                       default:
+ 147   1                            break;
+ 148   1                    }  
+ 149   1                    //beep = 0;
+ 150   1            }
+ 151   1                
+ 152   1                if(keyScanResult)
+ 153   1                {
+ 154   1                    
+ 155   1                    if(rec_flag_cnt > 0)
+ 156   1                    {
+ 157   1                        rec_flag   = 1;
+ 158   1                        rec_flag_cnt = 0;
+ 159   1                    }
+ 160   1         
+ 161   1                    if(rec_flag)
+ 162   1                  {
+ 163   1      
+ 164   1                        //SendData2(0xee);
+ 165   1                        uart2_sendMes();
+ 166   1                      //  clear_uart2_data();
+ 167   1                      //  clear_uart2_mes();
+ 168   1                    }
+ 169   1                    else
+ 170   1                    {
+ 171   1                        fail_cnt++;
+ 172   1                        if(fail_cnt >= 30)
+ 173   1                            return 0;
+ 174   1                        uart2_body.cmd_type = 0;
+ 175   1                        //SendData2(0xcc);
+ 176   1                        uart2_sendMes();
+ 177   1                     //   clear_uart2_data();
+ 178   1                     //   clear_uart2_mes();
+ 179   1                    } 
+C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 4   
+
+ 180   1                }
+ 181   1              
+ 182   1          }
+ 183   1      */
+ 184   1        
+ 185   1        // ----------------------- 按键 -----------------------------
+ 186   1      //    Delay100ms();
+ 187   1      //    keyScanResult = keyScan();
+ 188   1      //    if(keyScanResult != S0_NO_INPUT)
+ 189   1      //      System_Power_Vcc_ON_OFF = !System_Power_Vcc_ON_OFF;
+ 190   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 191   1          
+ 192   1        // ------------------------ 充电检测 -----------------------------
+ 193   1          
+ 194   1      //    checkCharging();
+ 195   1      //    Delay999ms(); 
+ 196   1          
+ 197   1          
+ 198   1          //SendString4("Start 1.23 \n");
+ 199   1        
+ 200   1        // ---------------------------- 蓝牙 ---------------------------------
+ 201   1          
+ 202   1      //    SendString2("BT test \n ");
+ 203   1      //    Delay999ms();
+ 204   1      //    BT_OPEN;
+ 205   1      //    WEEK_UP_BT;
+ 206   1      //    TRAN_MODE_BLE_IN; // 默认透传模式
+ 207   1      //    
+ 208   1      //    Delay999ms();
+ 209   1      //    BT_CLOSE;
+ 210   1      //    SLEEP_BT;
+ 211   1      //    CMD_MODE_BLE_IN;    clear_uart2_data();
+ 212   1          
+ 213   1      //    keyScanResult = keyScan();  // 扫描按键
+ 214   1      //    switch(keyScanResult){  // 处理按键
+ 215   1      //      case S0_NO_INPUT:
+ 216   1      //        break;
+ 217   1      //      case S1_TUCH:
+ 218   1      //        if(uart2_rec_cnt > 0){
+ 219   1      //        Delay10ms();
+ 220   1      //        clear();
+ 221   1      //        
+ 222   1      //        SendString4(uart2_rec_data);
+ 223   1      //        WriteTestMessage57(uart2_rec_data);
+ 224   1      //        }
+ 225   1      //        break;
+ 226   1      //      case S2_KEYP:
+ 227   1      //        CMD_MODE_BLE_IN;
+ 228   1      //        break;  
+ 229   1      //      case S3_KEYM:
+ 230   1      //        TRAN_MODE_BLE_IN; // 默认透传模式
+ 231   1      //        break;
+ 232   1      //      case S4_MODE:
+ 233   1      //        SendString2("BT test \n ");
+ 234   1      //        break;
+ 235   1      //      case S5_ENTER:
+ 236   1      //        clear();
+ 237   1      //        WriteTestMessage(" BT TEST ");
+ 238   1      //        SendString4("Debug test \n ");
+ 239   1      //        break;
+ 240   1      //      default:
+ 241   1      //        SendString4("error \n ");
+C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 5   
+
+ 242   1      //        break;
+ 243   1      //    }
+ 244   1      //        
+ 245   1      //    if(uart2_rec_cnt > 0){
+ 246   1      //      Delay10ms();
+ 247   1      //      clear();
+ 248   1      //      
+ 249   1      //      SendString4(uart2_rec_data);
+ 250   1      //      WriteMessageByHex57(uart2_rec_data);
+ 251   1      //    }
+ 252   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 253   1      
+ 254   1        // -----进入掉电模式(休眠) 5ms唤醒一次  10 * 0.488ms ----------------
+ 255   1      //    P51  = 1; // 用于检测CPU使用率
+ 256   1      //    InPowerDownMode;
+ 257   1      //    P51 = 0;
+ 258   1        //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 259   1      
+ 260   1        // ------------------------------ 温度 电量 --------------------------------  
+ 261   1      
+ 262   1      //    Delay999ms();SendData(0xff);Delay999ms();SendData(0x00);
+ 263   1      //    
+ 264   1      //    memset(tempStr, 0, sizeof(tempStr));
+ 265   1      //    
+ 266   1      //    temp = tempScan();
+ 267   1      //      
+ 268   1      //    bat = getBatteryPercent();
+ 269   1      //    sprintf(tempStr, "temp = %.2f    BAT = %d%%", temp, (int)bat);
+ 270   1      //    SendData4(0xcc);
+ 271   1      //    SendData4(bat);
+ 272   1      //    SendString4(tempStr);
+ 273   1      //    WriteTestMessage57(tempStr);
+ 274   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 275   1        
+ 276   1        //------------------ 查询事件 -----------------------------------------
+ 277   1      //    keyScanResult = keyScan();  // 扫描按键
+ 278   1      //    switch(keyScanResult){  // 处理按键
+ 279   1      //      case S0_NO_INPUT:
+ 280   1      //        break;
+ 281   1      //      case S1_TUCH:
+ 282   1      //        SendString4("S1 \n ");
+ 283   1      //        break;
+ 284   1      //      case S2_KEYP:
+ 285   1      //        SendString4("S2 \n ");
+ 286   1      //        pageScan(keyScanResult);
+ 287   1      //        break;
+ 288   1      //      case S3_KEYM:
+ 289   1      //        SendString4("S3 \n ");
+ 290   1      //        pageScan(keyScanResult);  
+ 291   1      //        break;
+ 292   1      //      case S4_MODE:
+ 293   1      //        
+ 294   1      //        SendString4("S4 \n ");
+ 295   1      //        mode_flag_t = 0;
+ 296   1      //        pageScan(S0_NO_INPUT);
+ 297   1      //        break;
+ 298   1      //  
+ 299   1      //      case S5_ENTER:
+ 300   1      //        pageScan(keyScanResult);  
+ 301   1      //        break;
+ 302   1      //      default :
+ 303   1      //        SendString4("ERROR \n ");
+C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 6   
+
+ 304   1      //        //pageScan(keyScanResult, mode_flag_t);
+ 305   1      //        break;
+ 306   1      //        
+ 307   1      //    }
+ 308   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                
+ 309   1        
+ 310   1        
+ 311   1      
+ 312   1      //  }
+ 313   1          
+ 314   1        
+ 315   1        
+ 316   1      
+ 317   1      //  P51 = 1;
+ 318   1        return 0;
+ 319   1      
+ 320   1      }
+ 321          
+ 322          
+*** WARNING C294 IN LINE 318 OF main.c: unreachable code
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    104    ----
+   CONSTANT SIZE    =     39    ----
+   XDATA SIZE       =      5      12
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

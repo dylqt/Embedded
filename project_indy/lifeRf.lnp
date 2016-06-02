@@ -1,0 +1,20 @@
+"STARTUP.obj",
+"main.obj",
+"BLE.obj",
+"delay.obj",
+"indy.obj",
+"stc15_oled.obj",
+"stc15_adc.obj",
+"stc15_uart.obj",
+"stc15_flash.obj",
+"stc15_pwm.obj",
+"stc15_time.obj",
+"stc15_spi.obj",
+"stc15_int.obj",
+"beep.obj",
+"stc15_clk.obj",
+"power.obj",
+"keyScan.obj",
+"oled_data.obj" 
+TO "lifeRf" 
+RAMSIZE(256) 

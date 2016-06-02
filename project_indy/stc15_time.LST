@@ -1,0 +1,40 @@
+C51 COMPILER V9.52.0.0   STC15_TIME                                                        06/02/2016 10:19:05 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_TIME
+OBJECT MODULE PLACED IN stc15_time.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE stc15_time.c LARGE BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include "stc15_time.h"
+   2          #include "type.h"
+   3          
+   4          /*
+   5          功能: 定时器0定时功能，不打开中断
+   6          输入: time : 定时的时间us
+   7          */
+   8          void Timer0Init(unsigned int time)    //100微秒@22.1184MHz
+   9          {
+  10   1      
+  11   1        AUXR |= 0x80;   //定时器时钟1T模式
+  12   1        TMOD &= 0xF0;   //设置定时器模式
+  13   1        TL0 = (65536 - (FOSC / 1000000 * time));    //设置定时初值
+  14   1        TH0 = (65536 - (FOSC / 1000000 * time))>>8;   //设置定时初值
+  15   1        TF0 = 0;    //清除TF0标志   等待TF0
+  16   1        TR0 = 1;    //定时器0开始计时
+  17   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     83    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

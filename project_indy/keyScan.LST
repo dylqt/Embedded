@@ -1,0 +1,481 @@
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE KEYSCAN
+OBJECT MODULE PLACED IN keyScan.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE keyScan.c LARGE BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include "keyScan.h"
+   2          
+   3          
+   4          unsigned char mode_flag_t = 0;
+   5          
+   6          unsigned char keyScan(void)
+   7          {
+   8   1        unsigned char keyValue = 0;
+   9   1        unsigned char keyValue1 = 0;
+  10   1        unsigned char keyValue2 = 0;
+  11   1        keyValue = read_adc256(3);
+  12   1      
+  13   1        if(keyValue >= 205){
+  14   2          return S0_NO_INPUT;
+  15   2        }
+  16   1        else{
+  17   2          Delay10ms();
+  18   2          keyValue1 = read_adc256(3);
+  19   2          Delay10ms();
+  20   2          keyValue2 = read_adc256(3);
+  21   2          keyValue = (keyValue1 + keyValue2) / 2;
+  22   2      
+  23   2          while(1)  // µÈ´ý°´¼ü·Å¿ª
+  24   2          { 
+  25   3            Delay10ms();
+  26   3            if(read_adc256(3) > 205)
+  27   3              break;
+  28   3            else
+  29   3              SendData(read_adc256(3));
+  30   3          }
+  31   2        }
+  32   1        
+  33   1        if(keyValue < 18){      // S1 : tuch  0
+  34   2      
+  35   2          click10msBZ();  
+  36   2          return S1_TUCH;
+  37   2        }else if(keyValue < 59){  // S2 : key+  36
+  38   2      
+  39   2          click10msBZ();  
+  40   2          return S2_KEYP;
+  41   2        }else if(keyValue < 105){ // S3 : key-  82
+  42   2      
+  43   2          click10msBZ();  
+  44   2          return S3_KEYM;
+  45   2        }else if(keyValue < 155){ // S4 : Mode  126
+  46   2      
+  47   2          click10msBZ();  
+  48   2          return S4_MODE;
+  49   2        }else if(keyValue < 205){ // S5 : Enter 185      
+  50   2          click10msBZ();  
+  51   2          return S5_ENTER;
+  52   2        }
+  53   1        else      // if  keyValue > 205 means no Key input
+  54   1          return S0_NO_INPUT;
+  55   1        
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 2   
+
+  56   1      }
+  57          
+  58          
+  59          unsigned char keyScanTest(void)
+  60          {
+  61   1        unsigned char keyValue = 0;
+  62   1        unsigned char keyValue1 = 0;
+  63   1        unsigned char keyValue2 = 0;
+  64   1        keyValue = read_adc256(3);
+  65   1          if(keyValue >= 205)   //Èç¹ûÃ»ÓÐ°´¼ü°´ÏÂ£¬¼ÌÐøµÈ´ý
+  66   1            {
+  67   2              Delay10ms();  // Ã¿10ms¼ì²âÒ»´Î
+  68   2              SendString("NO : ");
+  69   2              SendData(0xff);
+  70   2              SendData(keyValue);
+  71   2        
+  72   2              SendString4("NO : ");
+  73   2              SendData(keyValue);
+  74   2              PWMCR &= ~0x20;         //¹Ø±ÕPWM7ÐÅºÅÊä³ö
+  75   2      
+  76   2              return S0_NO_INPUT;
+  77   2            }
+  78   1          else{
+  79   2            Delay50ms();
+  80   2            keyValue1 = read_adc256(3);
+  81   2            Delay10ms();
+  82   2            keyValue2 = read_adc256(3); 
+  83   2      
+  84   2            keyValue = (keyValue1 + keyValue2) / 2;
+  85   2          
+  86   2            if(keyValue < 18){      // S1 : tuch  0
+  87   3              SendString("S1 : ");
+  88   3              SendData(0xff);
+  89   3              SendData(keyValue);
+  90   3        
+  91   3              SendString4("S1 : ");
+  92   3              SendData(keyValue);
+  93   3        
+  94   3              GetPwmBZ(1, 60);
+  95   3              
+  96   3              return S1_TUCH;
+  97   3            }else if(keyValue < 59){  // S2 : key+  36
+  98   3              SendString("S2 : ");
+  99   3              SendData(0xff);
+ 100   3              SendData(keyValue);
+ 101   3        
+ 102   3              SendString4("S1 : ");
+ 103   3              SendData(keyValue);
+ 104   3        
+ 105   3              GetPwmBZ(2, 60);
+ 106   3        
+ 107   3              return S2_KEYP;
+ 108   3            }else if(keyValue < 105){ // S3 : key-  82
+ 109   3              SendString("S3 : ");
+ 110   3              SendData(0xff);
+ 111   3              SendData(keyValue);
+ 112   3              
+ 113   3              SendString4("S3 : ");
+ 114   3              SendData(keyValue);
+ 115   3        
+ 116   3              GetPwmBZ(3, 60);
+ 117   3        
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 3   
+
+ 118   3              return S3_KEYM;
+ 119   3            }else if(keyValue < 155){ // S4 : Mode  126
+ 120   3              SendString("S4 : ");
+ 121   3              SendData(0xff);
+ 122   3              SendData(keyValue);
+ 123   3        
+ 124   3              SendString4("S3 : ");
+ 125   3              SendData(keyValue);
+ 126   3        
+ 127   3              GetPwmBZ(4, 60);
+ 128   3        
+ 129   3              return S4_MODE;
+ 130   3            }else if(keyValue < 205){ // S5 : Enter 185
+ 131   3              SendString("S5 : ");
+ 132   3              SendData(0xff);
+ 133   3              SendData(keyValue);
+ 134   3        
+ 135   3              SendString4("S3 : ");
+ 136   3              SendData(keyValue);
+ 137   3              GetPwmBZ(0, 60);  // if  keyValue > 205 means no Key input 
+ 138   3              
+ 139   3              return S5_ENTER;
+ 140   3            }
+ 141   2            else
+ 142   2              return S0_NO_INPUT;
+ 143   2          }
+ 144   1      }
+ 145          
+ 146          
+ 147          
+ 148          void pageScan(unsigned char key)
+ 149          {
+ 150   1        unsigned dealkey = key;
+ 151   1      START:
+ 152   1        switch(mode_flag_t)
+ 153   1        {
+ 154   2          case 0 :  // Ö÷²Ëµ¥
+ 155   2            switch(dealkey){
+ 156   3              case S2_KEYP:
+ 157   3                break;
+ 158   3              case S3_KEYM:
+ 159   3                break;
+ 160   3              case S5_ENTER:
+ 161   3                mode_flag_t = 5;
+ 162   3                dealkey = S0_NO_INPUT;
+ 163   3                goto START;
+ 164   3              default:
+ 165   3                OledClear();
+ 166   3                OledFlush((unsigned char *)HM);
+ 167   3                SendString4(" MAIN MENU \n ");
+ 168   3                break;
+ 169   3            }
+ 170   2            break;
+ 171   2            
+ 172   2      
+ 173   2      //--------------- µÚÒ»Ò³ -------------------------------      
+ 174   2      
+ 175   2          case 5 :  // UHF mode
+ 176   2            switch(dealkey){
+ 177   3              case S2_KEYP:
+ 178   3                mode_flag_t = 6;
+ 179   3                dealkey = S0_NO_INPUT;
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 4   
+
+ 180   3                goto START;
+ 181   3              case S3_KEYM:
+ 182   3                mode_flag_t = 7;
+ 183   3                dealkey = S0_NO_INPUT;
+ 184   3                goto START;
+ 185   3              case S5_ENTER:
+ 186   3                break;
+ 187   3              default:
+ 188   3                OledClear();
+ 189   3                OledWriteMessage(" UHF MODE ");
+ 190   3                SendString4(" UHF MODE \n ");
+ 191   3                break;
+ 192   3            }
+ 193   2            break;
+ 194   2            
+ 195   2          case 6 :  // BT mode
+ 196   2            switch(dealkey){
+ 197   3              case S2_KEYP:
+ 198   3                mode_flag_t = 7;
+ 199   3                dealkey = S0_NO_INPUT;
+ 200   3                goto START;
+ 201   3              case S3_KEYM:
+ 202   3                mode_flag_t = 5;
+ 203   3                dealkey = S0_NO_INPUT;
+ 204   3                goto START;
+ 205   3              case S5_ENTER:
+ 206   3                break;
+ 207   3              default:
+ 208   3                OledClear();
+ 209   3                OledWriteMessage(" BT MODE ");
+ 210   3                SendString4(" BT MODE \n ");  
+ 211   3                break;
+ 212   3            }
+ 213   2            break;
+ 214   2            
+ 215   2          case 7 :  // Test mode
+ 216   2            switch(dealkey){
+ 217   3              case S2_KEYP:
+ 218   3                mode_flag_t = 5;
+ 219   3                dealkey = S0_NO_INPUT;
+ 220   3                goto START;
+ 221   3              case S3_KEYM:
+ 222   3                mode_flag_t = 6;
+ 223   3                dealkey = S0_NO_INPUT;
+ 224   3                goto START;
+ 225   3              case S5_ENTER:
+ 226   3                mode_flag_t = 10;
+ 227   3                dealkey = S0_NO_INPUT;
+ 228   3                goto START;       
+ 229   3              default:
+ 230   3                OledClear();
+ 231   3                OledWriteMessage(" TEST MODE ");
+ 232   3                SendString4(" TEST MODE \n ");  
+ 233   3                break;
+ 234   3            }
+ 235   2            break;
+ 236   2      
+ 237   2      
+ 238   2      // --------------TEST¡¡MODE -------------------------------------------
+ 239   2      
+ 240   2          case 10 : // battery 
+ 241   2            switch(dealkey){
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 5   
+
+ 242   3              case S2_KEYP:
+ 243   3                mode_flag_t = 11;
+ 244   3                dealkey = S0_NO_INPUT;
+ 245   3                goto START;
+ 246   3              case S3_KEYM:
+ 247   3                mode_flag_t = 13;
+ 248   3                dealkey = S0_NO_INPUT;
+ 249   3                goto START;
+ 250   3              case S5_ENTER:
+ 251   3                mode_flag_t = 15;
+ 252   3                dealkey = S0_NO_INPUT;
+ 253   3                goto START;
+ 254   3              default:
+ 255   3                OledClear();
+ 256   3                OledWriteMessage(" BATTERT MODE ");
+ 257   3                SendString4(" BATTERY MODE \n ");
+ 258   3                break;
+ 259   3            }
+ 260   2            break;
+ 261   2            
+ 262   2          case 11 : // BZ 
+ 263   2            switch(dealkey){
+ 264   3              case S2_KEYP:
+ 265   3                mode_flag_t = 12;
+ 266   3                dealkey = S0_NO_INPUT;
+ 267   3                goto START;
+ 268   3              case S3_KEYM:
+ 269   3                mode_flag_t = 10;
+ 270   3                dealkey = S0_NO_INPUT;
+ 271   3                goto START;
+ 272   3              case S5_ENTER:
+ 273   3                mode_flag_t = 20;
+ 274   3                dealkey = S0_NO_INPUT;
+ 275   3                goto START;
+ 276   3              
+ 277   3              default:
+ 278   3                OledClear();
+ 279   3                OledWriteMessage(" BZ MODE ");
+ 280   3                SendString4(" BZ MODE \n ");
+ 281   3                break;
+ 282   3            }
+ 283   2            break;
+ 284   2      
+ 285   2          case 12 : // OLED_timing 
+ 286   2            switch(dealkey){
+ 287   3              case S2_KEYP:
+ 288   3                mode_flag_t = 13;
+ 289   3                dealkey = S0_NO_INPUT;
+ 290   3                goto START;
+ 291   3              case S3_KEYM:
+ 292   3                mode_flag_t = 11;
+ 293   3                dealkey = S0_NO_INPUT;
+ 294   3                goto START;
+ 295   3              case S5_ENTER:
+ 296   3                mode_flag_t = 25;
+ 297   3                dealkey = S0_NO_INPUT;
+ 298   3                goto START;
+ 299   3              
+ 300   3              default:
+ 301   3                OledClear();
+ 302   3                OledWriteMessage(" OLED_timing set ");
+ 303   3                SendString4(" OLED_timing set \n ");
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 6   
+
+ 304   3                break;
+ 305   3            }
+ 306   2            break;
+ 307   2      
+ 308   2          case 13 : // OLED_BZ 
+ 309   2            switch(dealkey){
+ 310   3              case S2_KEYP:
+ 311   3                mode_flag_t = 10;
+ 312   3                dealkey = S0_NO_INPUT;
+ 313   3                goto START;
+ 314   3              case S3_KEYM:
+ 315   3                mode_flag_t = 12;
+ 316   3                dealkey = S0_NO_INPUT;
+ 317   3                goto START;
+ 318   3              case S5_ENTER:
+ 319   3                mode_flag_t = 30;
+ 320   3                dealkey = S0_NO_INPUT;
+ 321   3                goto START;
+ 322   3              
+ 323   3              default:
+ 324   3                OledClear();
+ 325   3                OledWriteMessage(" OLED_BZ set ");
+ 326   3                SendString4(" OLED_BZ set \n ");
+ 327   3                break;
+ 328   3            }
+ 329   2            break;
+ 330   2      
+ 331   2      //----------------- BATTERY MODE ----------------------------------------------------
+ 332   2      
+ 333   2          case 15 :
+ 334   2            
+ 335   2            switch(dealkey){
+ 336   3              case S2_KEYP:
+ 337   3                SendString4(" !System_Power_Vcc_ON_OFF \n ");
+ 338   3                System_Power_Vcc_ON_OFF = !System_Power_Vcc_ON_OFF;   //°´Ò»´Î key+  È¡·´  SystemPowee_Vcc_ON_OFFµçÆ½£
+             -»
+ 339   3                if(System_Power_Vcc_ON_OFF == 1){ //ÈôSystemPowee_Vcc_ON_OFFÎª¸ßµçÆ½Ê± £»ÑÓ³Ù100ms ¶Á PG £»
+ 340   4                  Delay100ms();
+ 341   4                  if(PG == 1){
+ 342   5                    OledClear();
+ 343   5                    OledWriteMessage(" U14 power good ");
+ 344   5                    SendString4(" U14 power good \n "); //ÈôÎª¸ßµçÆ½ DB¿ÚÊä³ö "U14 power good "; 
+ 345   5                  }
+ 346   4                  else{
+ 347   5                    OledClear();
+ 348   5                    OledWriteMessage(" U14 power NG OCP OTP ");
+ 349   5                    SendString4(" U14 power NG OCP OTP \n ");  //ÈôÎªµÍµçÆ½£»OLEDÏÔÊ¾NG£¬ÖÁÉÙ DB¿ÚÊä³ö "U14 power NG   
+             -OCP   OTP ";
+ 350   5                  }
+ 351   4                }
+ 352   3                break;
+ 353   3              case S3_KEYM:
+ 354   3                OledClear();
+ 355   3                OledWriteMessage(" N VSEL ");
+ 356   3                SendString4(" !VSEL \n ");
+ 357   3                VSEL = !VSEL;
+ 358   3                break;
+ 359   3              case S5_ENTER:
+ 360   3                OledClear();
+ 361   3                OledWriteMessage(" N BYP ");
+ 362   3                SendString4(" !BYP \n ");
+ 363   3                BYP = !BYP;
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 7   
+
+ 364   3                break;
+ 365   3              default:
+ 366   3                OledClear();
+ 367   3                OledWriteMessage(" BATTERY¡¡MODE IN ");
+ 368   3                SendString4(" BATTERY¡¡MODE IN \n ");
+ 369   3                break;
+ 370   3            }
+ 371   2            break;
+ 372   2      
+ 373   2      
+ 374   2      
+ 375   2      //----------------- BZ MODE ----------------------------------------------------
+ 376   2      
+ 377   2          case 20 :
+ 378   2            OledClear();
+ 379   2            OledWriteMessage(" BZ MODE IN ");
+ 380   2            SendString4(" BZ MODE IN \n ");
+ 381   2            break;
+ 382   2      
+ 383   2      // ------------------- OLED_timing set ---------------------------------
+ 384   2      
+ 385   2          case 25 : // OLED_timing 
+ 386   2            switch(dealkey){
+ 387   3              case S2_KEYP:
+ 388   3                OledClear();
+ 389   3                OledWriteMessage(" OLED get reading timing ");
+ 390   3                SendString4(" OLED_timing get reading timing \n ");
+ 391   3                break;
+ 392   3              case S3_KEYM:
+ 393   3                OledClear();
+ 394   3                OledWriteMessage(" OLED get writing timing ");
+ 395   3                SendString4(" OLED_timing get writing timing \n ");
+ 396   3                break;
+ 397   3              case S5_ENTER:
+ 398   3                break;
+ 399   3              default:
+ 400   3                OledClear();
+ 401   3                OledWriteMessage(" OLED_timing set IN ");
+ 402   3                SendString4(" OLED_timing set IN \n ");
+ 403   3                break;
+ 404   3            }
+ 405   2            break;  
+ 406   2      
+ 407   2      
+ 408   2      // ---------------- OLED_BZ set -------------------------------------
+ 409   2          case 30 : // OLED_timing 
+ 410   2            switch(dealkey){
+ 411   3              case S2_KEYP:
+ 412   3                OledClear();
+ 413   3                OledWriteMessage(" OLED_BZ up ");
+ 414   3                SendString4(" OLED_BZ up \n ");
+ 415   3                break;
+ 416   3              case S3_KEYM:
+ 417   3                OledClear();
+ 418   3                OledWriteMessage(" OLED_BZ down ");
+ 419   3                SendString4(" OLED_BZ down \n ");
+ 420   3                break;
+ 421   3              case S5_ENTER:
+ 422   3                break;
+ 423   3              default:
+ 424   3                OledClear();
+ 425   3                OledWriteMessage(" OLED_BZ set IN ");
+C51 COMPILER V9.52.0.0   KEYSCAN                                                           06/02/2016 10:19:05 PAGE 8   
+
+ 426   3                SendString4(" OLED_BZ set IN \n ");
+ 427   3                break;
+ 428   3            }
+ 429   2            break;  
+ 430   2      
+ 431   2            
+ 432   2      // --------------------------------------------------------
+ 433   2          default :
+ 434   2            OledClear();
+ 435   2            OledWriteMessage(" NOT SET ");
+ 436   2            SendString4(" NOT SET \n ");
+ 437   2            break;
+ 438   2      
+ 439   2      
+ 440   2        }
+ 441   1      }
+ 442          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1535    ----
+   CONSTANT SIZE    =    745    ----
+   XDATA SIZE       =      1       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
