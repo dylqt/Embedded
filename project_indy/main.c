@@ -45,7 +45,7 @@ int main()
 	//OledWriteMessage57("ABCDEabcdefghijklmnopqrstuvwxyz BT TEST 0123456498751321");
 
 	//OledWriteWordByHex57(3,0,'s');
-	//OledWriteMessageByHex57("hello world\n");
+	//OledOledWriteMessageByHex57("hello world\n");
 	//OledWeakUpDownMode(9);	// 启动睡眠模式
 	/*
 	while(1){
@@ -61,7 +61,7 @@ int main()
 		}
 	}*/
 	
-	
+	/*
 	while(1)
 	{
 		Delay100ms();
@@ -84,17 +84,17 @@ int main()
 					break;
 		}  
 	}
-	
+	*/
 	
 	
 	
 	// ------------------- indy ----------------------------------
   //  WDT_CONTR |= 0X37;//使能看门狗。128分频，喂狗时间大约2.6S.
-/*
+
 	clear_uart2_data();
 	clear_uart2_mes();
 	clear_rec_data();
-	clear();
+	OledClear();
 	 //阅读器参数预设。预设过程中关闭串口2中断。预设完成后再打开。
 	index_send(1);
 	
@@ -102,10 +102,10 @@ int main()
  
 	if(index_r_check(1) == 0)
 	{
-		WriteTestMessage57("connect OK ");
+		OledWriteMessage57("connect OK ");
 	}
 	else
-		WriteTestMessage57("connect error ");
+		OledWriteMessage57("connect error ");
 	
 	for(i = 1;i <= 33;i++)
 	{
@@ -121,26 +121,26 @@ int main()
 			
 	    	clear_uart2_mes();
 			
-	        WriteMessageByHex57(rec_data);
+	    	OledWriteMessageByHex57(rec_data);
 	      
 			for(send_times=0;send_times<5;send_times++)
 			{
 				clear_rec_data();
 	            switch(keyScanResult)
 	            {
-	                case 1:  
+	                case S1_TUCH:  
 	                    rec_flag=0;
-	                    indy_readtemp();//temp
+	                    indy_readtemp();	//temp
 	                    break;
 
-	                case 2: 
+	                case S2_KEYP: 
 	                    rec_flag=0;
-	                    indy_read_sensorcode();//sensor code
+	                    indy_read_sensorcode();	//sensor code
 	                    break;
 
-	                case 3: 
+	                case S3_KEYM: 
 	                    rec_flag=0;
-	                    indy_readrssi();//rssi
+	                    indy_readrssi();	//rssi
 	                    break;
 
 	               default:
@@ -180,7 +180,7 @@ int main()
 	        }
         
 		}
-*/
+
 	
 	// ----------------------- 按键 -----------------------------
 //		Delay100ms();
@@ -217,10 +217,10 @@ int main()
 //			case S1_TUCH:
 //				if(uart2_rec_cnt > 0){
 //				Delay10ms();
-//				clear();
+//				OledClear();
 //				
 //				SendString4(uart2_rec_data);
-//				WriteTestMessage57(uart2_rec_data);
+//				OledWriteMessage57(uart2_rec_data);
 //				}
 //				break;
 //			case S2_KEYP:
@@ -233,8 +233,8 @@ int main()
 //				SendString2("BT test \n ");
 //				break;
 //			case S5_ENTER:
-//				clear();
-//				WriteTestMessage(" BT TEST ");
+//				OledClear();
+//				OledWriteMessage(" BT TEST ");
 //				SendString4("Debug test \n ");
 //				break;
 //			default:
@@ -244,10 +244,10 @@ int main()
 //				
 //		if(uart2_rec_cnt > 0){
 //			Delay10ms();
-//			clear();
+//			OledClear();
 //			
 //			SendString4(uart2_rec_data);
-//			WriteMessageByHex57(uart2_rec_data);
+//			OledWriteMessageByHex57(uart2_rec_data);
 //		}
 	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -270,7 +270,7 @@ int main()
 //		SendData4(0xcc);
 //		SendData4(bat);
 //		SendString4(tempStr);
-//		WriteTestMessage57(tempStr);
+//		OledWriteMessage57(tempStr);
 	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 	
 	//------------------ 查询事件 -----------------------------------------

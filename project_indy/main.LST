@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 1   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/03/2016 08:56:23 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
@@ -54,7 +54,7 @@ line level    source
   45   1        //OledWriteMessage57("ABCDEabcdefghijklmnopqrstuvwxyz BT TEST 0123456498751321");
   46   1      
   47   1        //OledWriteWordByHex57(3,0,'s');
-  48   1        //OledWriteMessageByHex57("hello world\n");
+  48   1        //OledOledWriteMessageByHex57("hello world\n");
   49   1        //OledWeakUpDownMode(9);  // 启动睡眠模式
   50   1        /*
   51   1        while(1){
@@ -62,7 +62,7 @@ line level    source
   53   1          SendData(0xff);
   54   1          Delay200ms();
   55   1          SendData(0x00);
-C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 2   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/03/2016 08:56:23 PAGE 2   
 
   56   1          i = 0;
   57   1          while(rec_num){
@@ -72,40 +72,40 @@ line level    source
   61   1          }
   62   1        }*/
   63   1        
-  64   1        
+  64   1        /*
   65   1        while(1)
   66   1        {
-  67   2          Delay100ms();
-  68   2          keyScanResult = keyScan();
-  69   2          switch(keyScanResult)
-  70   2          {
-  71   3            case S1_TUCH:  
-  72   3              //OledExitingSleepMode();
-  73   3              OledWriteMessage57("exiting sleep mode");
-  74   3              break;
-  75   3            case S2_KEYP: 
-  76   3              break;
-  77   3            case S3_KEYM:         
-  78   3              OledWriteMessage57("entering sleep mode" );
-  79   3              //OledEnteringSleepMode();
-  80   3              break;
-  81   3            
-  82   3      
-  83   3           default:
-  84   3                break;
-  85   3          }  
-  86   2        }
-  87   1        
+  67   1          Delay100ms();
+  68   1          keyScanResult = keyScan();
+  69   1          switch(keyScanResult)
+  70   1          {
+  71   1            case S1_TUCH:  
+  72   1              //OledExitingSleepMode();
+  73   1              OledWriteMessage57("exiting sleep mode");
+  74   1              break;
+  75   1            case S2_KEYP: 
+  76   1              break;
+  77   1            case S3_KEYM:         
+  78   1              OledWriteMessage57("entering sleep mode" );
+  79   1              //OledEnteringSleepMode();
+  80   1              break;
+  81   1            
+  82   1      
+  83   1           default:
+  84   1                break;
+  85   1          }  
+  86   1        }
+  87   1        */
   88   1        
   89   1        
   90   1        
   91   1        // ------------------- indy ----------------------------------
   92   1        //  WDT_CONTR |= 0X37;//使能看门狗。128分频，喂狗时间大约2.6S.
-  93   1      /*
+  93   1      
   94   1        clear_uart2_data();
   95   1        clear_uart2_mes();
   96   1        clear_rec_data();
-  97   1        clear();
+  97   1        OledClear();
   98   1         //阅读器参数预设。预设过程中关闭串口2中断。预设完成后再打开。
   99   1        index_send(1);
  100   1        
@@ -113,89 +113,89 @@ line level    source
  102   1       
  103   1        if(index_r_check(1) == 0)
  104   1        {
- 105   1          WriteTestMessage57("connect OK ");
- 106   1        }
+ 105   2          OledWriteMessage57("connect OK ");
+ 106   2        }
  107   1        else
- 108   1          WriteTestMessage57("connect error ");
+ 108   1          OledWriteMessage57("connect error ");
  109   1        
  110   1        for(i = 1;i <= 33;i++)
  111   1        {
- 112   1              clear_rec_data();
- 113   1              index_send(i);
- 114   1              Delay20ms();    
- 115   1          }
+ 112   2              clear_rec_data();
+ 113   2              index_send(i);
+ 114   2              Delay20ms();    
+ 115   2          }
  116   1        
  117   1        while(1)
-C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 3   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/03/2016 08:56:23 PAGE 3   
 
  118   1          { 
- 119   1            Delay100ms();
- 120   1            keyScanResult = keyScan();
- 121   1            
- 122   1              clear_uart2_mes();
- 123   1            
- 124   1                WriteMessageByHex57(rec_data);
- 125   1              
- 126   1            for(send_times=0;send_times<5;send_times++)
- 127   1            {
- 128   1              clear_rec_data();
- 129   1                    switch(keyScanResult)
- 130   1                    {
- 131   1                        case 1:  
- 132   1                            rec_flag=0;
- 133   1                            indy_readtemp();//temp
- 134   1                            break;
- 135   1      
- 136   1                        case 2: 
- 137   1                            rec_flag=0;
- 138   1                            indy_read_sensorcode();//sensor code
- 139   1                            break;
- 140   1      
- 141   1                        case 3: 
- 142   1                            rec_flag=0;
- 143   1                            indy_readrssi();//rssi
- 144   1                            break;
- 145   1      
- 146   1                       default:
- 147   1                            break;
- 148   1                    }  
- 149   1                    //beep = 0;
- 150   1            }
- 151   1                
- 152   1                if(keyScanResult)
- 153   1                {
- 154   1                    
- 155   1                    if(rec_flag_cnt > 0)
- 156   1                    {
- 157   1                        rec_flag   = 1;
- 158   1                        rec_flag_cnt = 0;
- 159   1                    }
- 160   1         
- 161   1                    if(rec_flag)
- 162   1                  {
- 163   1      
- 164   1                        //SendData2(0xee);
- 165   1                        uart2_sendMes();
- 166   1                      //  clear_uart2_data();
- 167   1                      //  clear_uart2_mes();
- 168   1                    }
- 169   1                    else
- 170   1                    {
- 171   1                        fail_cnt++;
- 172   1                        if(fail_cnt >= 30)
- 173   1                            return 0;
- 174   1                        uart2_body.cmd_type = 0;
- 175   1                        //SendData2(0xcc);
- 176   1                        uart2_sendMes();
- 177   1                     //   clear_uart2_data();
- 178   1                     //   clear_uart2_mes();
- 179   1                    } 
-C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 4   
+ 119   2            Delay100ms();
+ 120   2            keyScanResult = keyScan();
+ 121   2            
+ 122   2              clear_uart2_mes();
+ 123   2            
+ 124   2              OledWriteMessageByHex57(rec_data);
+ 125   2              
+ 126   2            for(send_times=0;send_times<5;send_times++)
+ 127   2            {
+ 128   3              clear_rec_data();
+ 129   3                    switch(keyScanResult)
+ 130   3                    {
+ 131   4                        case S1_TUCH:  
+ 132   4                            rec_flag=0;
+ 133   4                            indy_readtemp();//temp
+ 134   4                            break;
+ 135   4      
+ 136   4                        case S2_KEYP: 
+ 137   4                            rec_flag=0;
+ 138   4                            indy_read_sensorcode();//sensor code
+ 139   4                            break;
+ 140   4      
+ 141   4                        case S3_KEYM: 
+ 142   4                            rec_flag=0;
+ 143   4                            indy_readrssi();//rssi
+ 144   4                            break;
+ 145   4      
+ 146   4                       default:
+ 147   4                            break;
+ 148   4                    }  
+ 149   3                    //beep = 0;
+ 150   3            }
+ 151   2                
+ 152   2                if(keyScanResult)
+ 153   2                {
+ 154   3                    
+ 155   3                    if(rec_flag_cnt > 0)
+ 156   3                    {
+ 157   4                        rec_flag   = 1;
+ 158   4                        rec_flag_cnt = 0;
+ 159   4                    }
+ 160   3         
+ 161   3                    if(rec_flag)
+ 162   3                  {
+ 163   4      
+ 164   4                        //SendData2(0xee);
+ 165   4                        uart2_sendMes();
+ 166   4                      //  clear_uart2_data();
+ 167   4                      //  clear_uart2_mes();
+ 168   4                    }
+ 169   3                    else
+ 170   3                    {
+ 171   4                        fail_cnt++;
+ 172   4                        if(fail_cnt >= 30)
+ 173   4                            return 0;
+ 174   4                        uart2_body.cmd_type = 0;
+ 175   4                        //SendData2(0xcc);
+ 176   4                        uart2_sendMes();
+ 177   4                     //   clear_uart2_data();
+ 178   4                     //   clear_uart2_mes();
+ 179   4                    } 
+C51 COMPILER V9.52.0.0   MAIN                                                              06/03/2016 08:56:23 PAGE 4   
 
- 180   1                }
- 181   1              
- 182   1          }
- 183   1      */
+ 180   3                }
+ 181   2              
+ 182   2          }
+ 183   1      
  184   1        
  185   1        // ----------------------- 按键 -----------------------------
  186   1      //    Delay100ms();
@@ -232,10 +232,10 @@ line level    source
  217   1      //      case S1_TUCH:
  218   1      //        if(uart2_rec_cnt > 0){
  219   1      //        Delay10ms();
- 220   1      //        clear();
+ 220   1      //        OledClear();
  221   1      //        
  222   1      //        SendString4(uart2_rec_data);
- 223   1      //        WriteTestMessage57(uart2_rec_data);
+ 223   1      //        OledWriteMessage57(uart2_rec_data);
  224   1      //        }
  225   1      //        break;
  226   1      //      case S2_KEYP:
@@ -248,23 +248,23 @@ line level    source
  233   1      //        SendString2("BT test \n ");
  234   1      //        break;
  235   1      //      case S5_ENTER:
- 236   1      //        clear();
- 237   1      //        WriteTestMessage(" BT TEST ");
+ 236   1      //        OledClear();
+ 237   1      //        OledWriteMessage(" BT TEST ");
  238   1      //        SendString4("Debug test \n ");
  239   1      //        break;
  240   1      //      default:
  241   1      //        SendString4("error \n ");
-C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 5   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/03/2016 08:56:23 PAGE 5   
 
  242   1      //        break;
  243   1      //    }
  244   1      //        
  245   1      //    if(uart2_rec_cnt > 0){
  246   1      //      Delay10ms();
- 247   1      //      clear();
+ 247   1      //      OledClear();
  248   1      //      
  249   1      //      SendString4(uart2_rec_data);
- 250   1      //      WriteMessageByHex57(uart2_rec_data);
+ 250   1      //      OledWriteMessageByHex57(uart2_rec_data);
  251   1      //    }
  252   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  253   1      
@@ -287,7 +287,7 @@ line level    source
  270   1      //    SendData4(0xcc);
  271   1      //    SendData4(bat);
  272   1      //    SendString4(tempStr);
- 273   1      //    WriteTestMessage57(tempStr);
+ 273   1      //    OledWriteMessage57(tempStr);
  274   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  275   1        
  276   1        //------------------ 查询事件 -----------------------------------------
@@ -318,7 +318,7 @@ line level    source
  301   1      //        break;
  302   1      //      default :
  303   1      //        SendString4("ERROR \n ");
-C51 COMPILER V9.52.0.0   MAIN                                                              06/02/2016 10:19:03 PAGE 6   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/03/2016 08:56:23 PAGE 6   
 
  304   1      //        //pageScan(keyScanResult, mode_flag_t);
  305   1      //        break;
@@ -343,8 +343,8 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    104    ----
-   CONSTANT SIZE    =     39    ----
+   CODE SIZE        =    286    ----
+   CONSTANT SIZE    =     27    ----
    XDATA SIZE       =      5      12
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----

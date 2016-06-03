@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/02/2016 10:19:04 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/03/2016 08:56:23 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_ADC
@@ -62,7 +62,7 @@ line level    source
   53          {
   54   1        unsigned int adcValue1 = 0;
   55   1        unsigned int adcValue2 = 0;
-C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/02/2016 10:19:04 PAGE 2   
+C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/03/2016 08:56:23 PAGE 2   
 
   56   1        unsigned int keyAdcValue = 0;
   57   1        
@@ -126,7 +126,7 @@ line level    source
  115          功能 : 将adc采集到的数字量，通过基准值计算，得到模拟值大小、
  116          公式 : adc_result = 256 * (vin / vcc)
  117          输入 : 
-C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/02/2016 10:19:04 PAGE 3   
+C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/03/2016 08:56:23 PAGE 3   
 
  118            adc_result : 数字量
  119            base : 基准值
@@ -190,7 +190,7 @@ line level    source
  177   1          while (n--)
  178   1          {
  179   2              x = 5000;
-C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/02/2016 10:19:04 PAGE 4   
+C51 COMPILER V9.52.0.0   STC15_ADC                                                         06/03/2016 08:56:23 PAGE 4   
 
  180   2              while (x--);
  181   2          }

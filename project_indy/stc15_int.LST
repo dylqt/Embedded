@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/02/2016 10:19:05 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_INT
@@ -62,7 +62,7 @@ line level    source
   53   1        
   54   1      }
   55          
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/02/2016 10:19:05 PAGE 2   
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 2   
 
   56          void t0IntInit(void)
   57          {
@@ -126,7 +126,7 @@ line level    source
  115          
  116          
  117          //-----------------------------------------
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/02/2016 10:19:05 PAGE 3   
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 3   
 
  118          // INT1中断服务程序
  119          void exint1() interrupt 2       //INT1中断入口
@@ -190,7 +190,7 @@ line level    source
  177   1      //  INT_CLKO &= 0xBF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
  178   1      //  INT_CLKO |= 0x40;               //然后再开中断即可
  179   1      }
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/02/2016 10:19:05 PAGE 4   
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 4   
 
  180          
  181          void Int4Init()
