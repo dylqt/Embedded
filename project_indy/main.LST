@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 09:44:04 PAGE 1   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   53   1        
   54   1      //  while(1){ 
   55   1      //    Delay999ms();
-C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 09:44:04 PAGE 2   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 2   
 
   56   1          //ble_inquire_baud();
   57   1      //    ble_set_baud(2);
@@ -126,7 +126,7 @@ line level    source
  115   1      //    OledWriteMessage57("connect OK ");
  116   1      //  }
  117   1      //  else
-C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 09:44:04 PAGE 3   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 3   
 
  118   1      //    OledWriteMessage57("connect error ");
  119   1      
@@ -190,7 +190,7 @@ line level    source
  177   1      //              {
  178   1      //                  rec_flag   = 1;
  179   1      //                  rec_flag_cnt = 0;
-C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 09:44:04 PAGE 4   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 4   
 
  180   1      //              }
  181   1      //   
@@ -254,7 +254,7 @@ line level    source
  239   1      //        if(uart2_rec_cnt > 0){
  240   1      //        Delay10ms();
  241   1      //        OledClear();
-C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 09:44:04 PAGE 5   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 5   
 
  242   1      //        
  243   1      //        SendString4(uart2_rec_data);
@@ -318,7 +318,7 @@ line level    source
  301   1      //        break;
  302   1      //      case S1_TUCH:
  303   1      //        SendString4("S1 \n ");
-C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 09:44:04 PAGE 6   
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 6   
 
  304   1      //        break;
  305   1      //      case S2_KEYP:
@@ -348,29 +348,42 @@ line level    source
  329   1        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                
  330   1        
  331   1        // --------------------- 业务 ---------------------------------
- 332   1        while(1){
- 333   2          Delay100ms();   // 100ms 处理一次事件
- 334   2      
- 335   2          
- 336   2      
- 337   2        }
- 338   1          
- 339   1        
- 340   1        
- 341   1      
- 342   1      //  P51 = 1;
- 343   1        return 0;
- 344   1      
- 345   1      }
- 346          
- 347          
-*** WARNING C294 IN LINE 343 OF main.c: unreachable code
+ 332   1      
+ 333   1        OledWriteWordByHex(3,0,WIRC_H);
+ 334   1        OledWriteWordByHex(3,16,WIRC_L);
+ 335   1        //WKTCL = 100;
+ 336   1        // WKTCH = 0;
+ 337   1        //WKTCH = 0x80;
+ 338   1      //  WeakUpDownMode(2000);
+ 339   1        while(1){
+ 340   2      //    OledWriteMessage("Sleep");
+ 341   2      //    
+ 342   2      //    
+ 343   2      //    InPowerDownMode;      
+ 344   2      //    OledWriteMessage("Weekup");
+ 345   2      //    Delay999ms();
+ 346   2          
+ 347   2      
+ 348   2        }
+ 349   1          
+ 350   1        
+ 351   1        
+ 352   1      
+ 353   1      //  P51 = 1;
+ 354   1        return 0;
+ 355   1      
+ 356   1      }
+ 357          
+ 358          
+*** WARNING C294 IN LINE 354 OF main.c: unreachable code
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     87    ----
+   CODE SIZE        =    102    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      5      12
+C51 COMPILER V9.52.0.0   MAIN                                                              06/08/2016 14:58:01 PAGE 7   
+
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

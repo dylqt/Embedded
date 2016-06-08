@@ -1,4 +1,6 @@
 #include "stc15_uart.h"
+#define DEBUG
+
 
 bit   busy, busy2, busy3, busy4;
 xdata uint8 rec_data[500];
@@ -374,10 +376,12 @@ void SendData4(BYTE dat)
 ----------------------------*/
 void SendString4(char *s)
 {
+#ifdef DEBUG
     while (*s)                  //检测字符串结束标志
     {
         SendData4(*s++);         //发送当前字符
     }
+#endif
 }
 
 

@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 09:44:05 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 14:58:02 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_FLASH
@@ -62,7 +62,7 @@ line level    source
   53   1          IAP_ADDRL = 0;
   54   1      }
   55          
-C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 09:44:05 PAGE 2   
+C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 14:58:02 PAGE 2   
 
   56          /*----------------------------
   57          从ISP/IAP/EEPROM区域读取一字节
@@ -126,7 +126,7 @@ line level    source
  115   1          /* 判是否是有效范围,此函数不允许跨扇区操作 */
  116   1          if(counter > USED_BYTE_QTY_IN_ONE_SECTOR)
  117   1              return  ERROR;
-C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 09:44:05 PAGE 3   
+C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 14:58:02 PAGE 3   
 
  118   1          in_sector_begin_addr = begin_addr & 0x01ff;
  119   1          if((in_sector_begin_addr + counter) > USED_BYTE_QTY_IN_ONE_SECTOR)
@@ -190,7 +190,7 @@ line level    source
  177   1          byte_addr = sector_addr;
  178   1          for(i = 0; i< USED_BYTE_QTY_IN_ONE_SECTOR; i++)
  179   1          {
-C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 09:44:05 PAGE 4   
+C51 COMPILER V9.52.0.0   STC15_FLASH                                                       06/08/2016 14:58:02 PAGE 4   
 
  180   2              /* 写一个字节 */
  181   2              IapProgramByte(byte_addr, protect_buffer[i]);

@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_OLED
@@ -62,7 +62,7 @@ line level    source
   53   1           {
   54   2             SCLK_OLED = 0; // SCLK.low();  
   55   2             SDIN_OLED = i & dat; // SDIN.set(i&dat);      
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 2   
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 2   
 
   56   2             uDelay(15);
   57   2             SCLK_OLED = 1; // SCLK.high();      
@@ -126,7 +126,7 @@ line level    source
  107   1      
  108   1        
  109   1        //flush((unsigned char *)HM);//清屏
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 3   
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 3   
 
  110   1        OledClear();
  111   1        
@@ -190,7 +190,7 @@ line level    source
  169          */
  170          void OledClear(void)    //此版本为line mode
  171          {
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 4   
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 4   
 
  172   1        unsigned char page = 0;   
  173   1        uint8_t column = 0;
@@ -240,7 +240,7 @@ line level    source
  217          {  
  218   1        uint8_t column = 0;
  219   1        
- 220   1        if(Page > 4 || Col > MAX_COLUMN || buf == NULL || Page < 0 || Col < 0 || Col + bufNum > MAX_COLUMN)
+ 220   1        if(Page > 4 || Col > MAX_COLUMN || buf == NULL || Col + bufNum > MAX_COLUMN)
  221   1          return 1;
  222   1        
  223   1          SetStartPage(Page);   //SetPageAddress(page); 
@@ -254,7 +254,7 @@ line level    source
  231   1        return 0;
  232   1      }
  233          
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 5   
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 5   
 
  234          
  235          /*
@@ -318,7 +318,7 @@ line level    source
  293   4            }
  294   3            }
  295   2          else if(*str >= 'a' && *str <= 'z'){  // a - z
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 6   
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 6   
 
  296   3            for(i = 0; i < 8; i++){
  297   4              WR1BData(LETTER[*str - 'a'][i + 8]);
@@ -350,334 +350,336 @@ line level    source
  323   1        unsigned char i = 0;
  324   1        unsigned char left = (Data >> 4);
  325   1        unsigned char right = (Data & 0x0f);
- 326   1        if(Page > 4 || Col > MAX_COLUMN)
- 327   1          return 1;
- 328   1        SetStartPage(Page);         //SetPageAddress(page); 
- 329   1          SetStartColumn(Col);
- 330   1        for(i = 0; i < 8; i++){
- 331   2          WR1BData(Num[left][i]);
- 332   2        }
- 333   1        SetStartPage(Page + 1);         //SetPageAddress(page); 
- 334   1          SetStartColumn(Col);
- 335   1        for(i = 0; i < 8; i++){
- 336   2            WR1BData(Num[left][i + 8]);
- 337   2        }
- 338   1      
- 339   1        SetStartPage(Page);         //SetPageAddress(page); 
- 340   1          SetStartColumn(Col + 8);
- 341   1        for(i = 0; i < 8; i++){
- 342   2          if(i != 7)
- 343   2            WR1BData(Num[right][i]);
- 344   2          else
- 345   2            WR1BData(Num[right][i] | 1);
- 346   2        }
- 347   1        SetStartPage(Page + 1);         //SetPageAddress(page); 
- 348   1          SetStartColumn(Col + 8);
- 349   1        for(i = 0; i < 8; i++){
- 350   2            WR1BData(Num[right][i + 8]);
- 351   2        }
- 352   1        return 0;
- 353   1      }
- 354          
- 355          
- 356          /*
- 357            功能 : 输出HEX码的数据，最多输出24个数字，即12个字符
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 7   
+ 326   1        
+ 327   1        if(Page > 4 || Col > MAX_COLUMN)
+ 328   1          return 1;
+ 329   1        
+ 330   1        SetStartPage(Page);         //SetPageAddress(page); 
+ 331   1          SetStartColumn(Col);
+ 332   1        for(i = 0; i < 8; i++){
+ 333   2          WR1BData(Num[left][i]);
+ 334   2        }
+ 335   1        SetStartPage(Page + 1);         //SetPageAddress(page); 
+ 336   1          SetStartColumn(Col);
+ 337   1        for(i = 0; i < 8; i++){
+ 338   2            WR1BData(Num[left][i + 8]);
+ 339   2        }
+ 340   1      
+ 341   1        SetStartPage(Page);         //SetPageAddress(page); 
+ 342   1          SetStartColumn(Col + 8);
+ 343   1        for(i = 0; i < 8; i++){
+ 344   2          if(i != 7)
+ 345   2            WR1BData(Num[right][i]);
+ 346   2          else
+ 347   2            WR1BData(Num[right][i] | 1);
+ 348   2        }
+ 349   1        SetStartPage(Page + 1);         //SetPageAddress(page); 
+ 350   1          SetStartColumn(Col + 8);
+ 351   1        for(i = 0; i < 8; i++){
+ 352   2            WR1BData(Num[right][i + 8]);
+ 353   2        }
+ 354   1        return 0;
+ 355   1      }
+ 356          
+ 357          
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 7   
 
- 358            输入 : 数组数据，以及数组的长度
- 359            输出 : 当数组超过12个字符时，显示12个字符，并返回错误代码
- 360          */
- 361          char OledWriteBufByHex(unsigned char *Data, unsigned char Num)
- 362          {
- 363   1        unsigned char dataNum = 0;
- 364   1        if(Data == NULL)
- 365   1          return 1;
- 366   1        while(dataNum < Num){
- 367   2          if(dataNum < 6){
- 368   3            OledWriteWordByHex(1, dataNum * 16, Data[dataNum]);
- 369   3          }
- 370   2          else if(dataNum < 12)
- 371   2            OledWriteWordByHex(3, (dataNum - 6) * 16, Data[dataNum]);
- 372   2          else 
- 373   2            return 1;
- 374   2          ++dataNum;
- 375   2        }
- 376   1        return 0;
- 377   1        
- 378   1      }
- 379          
- 380          /*
- 381            功能 : 使用5*7字模  输出一个字符的HEX码
- 382            输入 : Page 和 Col 显示的位置
- 383              Page : 
- 384              Col : 最好6的倍数 
- 385          */
- 386          
- 387          char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data)
- 388          {
- 389   1        unsigned char i = 0;
- 390   1        unsigned char left = (Data >> 4);
- 391   1        unsigned char right = (Data & 0x0f);
- 392   1      
- 393   1        if(Page > 4 || Col > MAX_COLUMN)
- 394   1          return 1;
- 395   1        
- 396   1        SetStartPage(Page);         //SetPageAddress(page); 
- 397   1          SetStartColumn(Col);
- 398   1        if(left >=0 && left <= 9){
- 399   2          for(i = 0; i < 5; i++){
- 400   3            WR1BData(Fonts[('0' - 32 + left) * 5 + i]);
- 401   3          }
- 402   2        }
- 403   1        else if(left >= 10 && left <= 15){
- 404   2          for(i = 0; i < 5; i++){
- 405   3            WR1BData(Fonts[('A' - 32 + left - 10) * 5 + i]);
- 406   3          }
- 407   2        }
- 408   1        else return 0;
- 409   1          
- 410   1        WR1BData(0x00);
- 411   1        
- 412   1      //  SetStartPage(Page);         //SetPageAddress(page); 
- 413   1      //  SetStartColumn(Col + 6);
- 414   1        
- 415   1        if(right >=0 && right <= 9){
- 416   2          for(i = 0; i < 5; i++){
- 417   3            WR1BData(Fonts[('0' - 32 + right) * 5 + i]);
- 418   3          }
- 419   2        }
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 8   
+ 358          /*
+ 359            功能 : 输出HEX码的数据，最多输出24个数字，即12个字符
+ 360            输入 : 数组数据，以及数组的长度
+ 361            输出 : 当数组超过12个字符时，显示12个字符，并返回错误代码
+ 362          */
+ 363          char OledWriteBufByHex(unsigned char *Data, unsigned char Num)
+ 364          {
+ 365   1        unsigned char dataNum = 0;
+ 366   1        if(Data == NULL)
+ 367   1          return 1;
+ 368   1        while(dataNum < Num){
+ 369   2          if(dataNum < 6){
+ 370   3            OledWriteWordByHex(1, dataNum * 16, Data[dataNum]);
+ 371   3          }
+ 372   2          else if(dataNum < 12)
+ 373   2            OledWriteWordByHex(3, (dataNum - 6) * 16, Data[dataNum]);
+ 374   2          else 
+ 375   2            return 1;
+ 376   2          ++dataNum;
+ 377   2        }
+ 378   1        return 0;
+ 379   1        
+ 380   1      }
+ 381          
+ 382          /*
+ 383            功能 : 使用5*7字模  输出一个字符的HEX码
+ 384            输入 : Page 和 Col 显示的位置
+ 385              Page : 
+ 386              Col : 最好6的倍数 
+ 387          */
+ 388          
+ 389          char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data)
+ 390          {
+ 391   1        unsigned char i = 0;
+ 392   1        unsigned char left = (Data >> 4);
+ 393   1        unsigned char right = (Data & 0x0f);
+ 394   1      
+ 395   1        if(Page > 4 || Col > MAX_COLUMN)
+ 396   1          return 1;
+ 397   1        
+ 398   1        SetStartPage(Page);         //SetPageAddress(page); 
+ 399   1          SetStartColumn(Col);
+ 400   1        if(left >=0 && left <= 9){
+ 401   2          for(i = 0; i < 5; i++){
+ 402   3            WR1BData(Fonts[('0' - 32 + left) * 5 + i]);
+ 403   3          }
+ 404   2        }
+ 405   1        else if(left >= 10 && left <= 15){
+ 406   2          for(i = 0; i < 5; i++){
+ 407   3            WR1BData(Fonts[('A' - 32 + left - 10) * 5 + i]);
+ 408   3          }
+ 409   2        }
+ 410   1        else return 0;
+ 411   1          
+ 412   1        WR1BData(0x00);
+ 413   1        
+ 414   1      //  SetStartPage(Page);         //SetPageAddress(page); 
+ 415   1      //  SetStartColumn(Col + 6);
+ 416   1        
+ 417   1        if(right >=0 && right <= 9){
+ 418   2          for(i = 0; i < 5; i++){
+ 419   3            WR1BData(Fonts[('0' - 32 + right) * 5 + i]);
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 8   
 
- 420   1        else if(right >= 10 && right <= 15){
- 421   2          for(i = 0; i < 5; i++){
- 422   3            WR1BData(Fonts[('A' - 32 + right - 10) * 5 + i]);
- 423   3          }
- 424   2        }
- 425   1        else return 0;
- 426   1        WR1BData(0x03); 
- 427   1        return 0;
- 428   1      }
- 429          
- 430          
- 431          /*
- 432            功能 : 使用5*7字模  输出HEX码的数据，最多输出64个数字，即32个字符
- 433            输入 : 数组数据
- 434          */
- 435          char OledWriteBufByHex57(unsigned char *str, unsigned char Num)
- 436          {
- 437   1        unsigned char charNum = 0;
- 438   1        unsigned char i = 0;
- 439   1        //clearPageCol(0, 0);
- 440   1      
- 441   1        if(str == NULL) return 1;
- 442   1        
- 443   1        while(charNum < Num){
- 444   2          if(charNum < 8){      //第一排字
- 445   3            OledWriteWordByHex57(1, charNum * 12, *str);
- 446   3              }
- 447   2              else if(charNum < 16){
- 448   3            OledWriteWordByHex57(2, (charNum - 8) * 12, *str);
- 449   3      
- 450   3          }
- 451   2          else if(charNum < 24){
- 452   3            OledWriteWordByHex57(3, (charNum - 16) * 12, *str);
- 453   3      
- 454   3          }
- 455   2          else if(charNum < 32){
- 456   3            OledWriteWordByHex57(4, (charNum - 24) * 12, *str);
- 457   3      
- 458   3          }
- 459   2          else
- 460   2            return 1;
- 461   2          str++;
- 462   2          charNum++;
- 463   2        }
- 464   1      
- 465   1        return 0;
- 466   1        /*
- 467   1        while(1){
- 468   1            
- 469   1            if(charNum < 8){      //第一排字
- 470   1              OledWriteAssic57(1, charNum * 6, ' ');
- 471   1              OledWriteAssic57(1, (charNum + 1) * 6, ' ');
- 472   1            }
- 473   1            else if(charNum < 16){
- 474   1              OledWriteAssic57(2, (charNum - 16) * 6, ' ');
- 475   1              OledWriteAssic57(2, (charNum - 16 + 1) * 6, ' ');
- 476   1        
- 477   1            }
- 478   1            else if(charNum < 24){
- 479   1              OledWriteAssic57(3, (charNum - 32) * 6, ' ');
- 480   1              OledWriteAssic57(3, (charNum - 32 + 1) * 6, ' ');
- 481   1        
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 9   
+ 420   3          }
+ 421   2        }
+ 422   1        else if(right >= 10 && right <= 15){
+ 423   2          for(i = 0; i < 5; i++){
+ 424   3            WR1BData(Fonts[('A' - 32 + right - 10) * 5 + i]);
+ 425   3          }
+ 426   2        }
+ 427   1        else return 0;
+ 428   1        WR1BData(0x03); 
+ 429   1        return 0;
+ 430   1      }
+ 431          
+ 432          
+ 433          /*
+ 434            功能 : 使用5*7字模  输出HEX码的数据，最多输出64个数字，即32个字符
+ 435            输入 : 数组数据
+ 436          */
+ 437          char OledWriteBufByHex57(unsigned char *str, unsigned char Num)
+ 438          {
+ 439   1        unsigned char charNum = 0;
+ 440   1        unsigned char i = 0;
+ 441   1        //clearPageCol(0, 0);
+ 442   1      
+ 443   1        if(str == NULL) return 1;
+ 444   1        
+ 445   1        while(charNum < Num){
+ 446   2          if(charNum < 8){      //第一排字
+ 447   3            OledWriteWordByHex57(1, charNum * 12, *str);
+ 448   3              }
+ 449   2              else if(charNum < 16){
+ 450   3            OledWriteWordByHex57(2, (charNum - 8) * 12, *str);
+ 451   3      
+ 452   3          }
+ 453   2          else if(charNum < 24){
+ 454   3            OledWriteWordByHex57(3, (charNum - 16) * 12, *str);
+ 455   3      
+ 456   3          }
+ 457   2          else if(charNum < 32){
+ 458   3            OledWriteWordByHex57(4, (charNum - 24) * 12, *str);
+ 459   3      
+ 460   3          }
+ 461   2          else
+ 462   2            return 1;
+ 463   2          str++;
+ 464   2          charNum++;
+ 465   2        }
+ 466   1      
+ 467   1        return 0;
+ 468   1        /*
+ 469   1        while(1){
+ 470   1            
+ 471   1            if(charNum < 8){      //第一排字
+ 472   1              OledWriteAssic57(1, charNum * 6, ' ');
+ 473   1              OledWriteAssic57(1, (charNum + 1) * 6, ' ');
+ 474   1            }
+ 475   1            else if(charNum < 16){
+ 476   1              OledWriteAssic57(2, (charNum - 16) * 6, ' ');
+ 477   1              OledWriteAssic57(2, (charNum - 16 + 1) * 6, ' ');
+ 478   1        
+ 479   1            }
+ 480   1            else if(charNum < 24){
+ 481   1              OledWriteAssic57(3, (charNum - 32) * 6, ' ');
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 9   
 
- 482   1            }
- 483   1            else if(charNum < 32){
- 484   1              OledWriteAssic57(4, (charNum - 48) * 6, ' ');
- 485   1              OledWriteAssic57(4,(charNum - 48 + 1) * 6, ' ');
- 486   1        
- 487   1            }
- 488   1            else
- 489   1              break;
- 490   1            charNum++;
- 491   1            }
- 492   1        */
- 493   1      }
- 494          
- 495          /*
- 496            功能 : 使用5*7字模 输出一个字符的assic码
- 497            输入 : Page 和 Col 显示的位置
- 498              Page : 
- 499              Col : 最好6的倍数 
- 500              Data : 字母
- 501          */
- 502          char OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data)
- 503          {
- 504   1          unsigned char i = 0;
- 505   1          
- 506   1          if(Page > 4 || Col > MAX_COLUMN)
- 507   1            return 1;
- 508   1      
- 509   1          if(Data < 32){
- 510   2            Data = 127;
- 511   2            SetStartPage(Page);         //SetPageAddress(page); 
- 512   2              SetStartColumn(Col);
- 513   2            for(i = 0; i < 5; i++){
- 514   3              WR1BData(Fonts[(Data - 32) * 5 + i]);
- 515   3            }
- 516   2            WR1BData(0x00); 
- 517   2            return 1;
- 518   2          }
- 519   1          
- 520   1          SetStartPage(Page);         //SetPageAddress(page); 
- 521   1            SetStartColumn(Col);
- 522   1          for(i = 0; i < 5; i++){
- 523   2            WR1BData(Fonts[(Data - 32) * 5 + i]);
- 524   2          }
- 525   1          WR1BData(0x00); 
- 526   1      
- 527   1          return 0;
- 528   1      }
- 529          
- 530          /*
- 531            功能 : 用于state 使用5*7字模 输出一个字符的assic码  
- 532            输入 : Page 和 Col 显示的位置
- 533              Page : 
- 534              Col : 最好6的倍数 
- 535              Data : 字母
- 536          */
- 537          char OledAssicForState(unsigned char Page, unsigned char Col,unsigned char Data)
- 538          {
- 539   1          unsigned char i = 0;
- 540   1          
- 541   1          if(Page > 4 || Col > MAX_COLUMN)
- 542   1            return 1;
- 543   1          if(Data < 32){
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 10  
+ 482   1              OledWriteAssic57(3, (charNum - 32 + 1) * 6, ' ');
+ 483   1        
+ 484   1            }
+ 485   1            else if(charNum < 32){
+ 486   1              OledWriteAssic57(4, (charNum - 48) * 6, ' ');
+ 487   1              OledWriteAssic57(4,(charNum - 48 + 1) * 6, ' ');
+ 488   1        
+ 489   1            }
+ 490   1            else
+ 491   1              break;
+ 492   1            charNum++;
+ 493   1            }
+ 494   1        */
+ 495   1      }
+ 496          
+ 497          /*
+ 498            功能 : 使用5*7字模 输出一个字符的assic码
+ 499            输入 : Page 和 Col 显示的位置
+ 500              Page : 
+ 501              Col : 最好6的倍数 
+ 502              Data : 字母
+ 503          */
+ 504          char OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data)
+ 505          {
+ 506   1          unsigned char i = 0;
+ 507   1          
+ 508   1          if(Page > 4 || Col > MAX_COLUMN)
+ 509   1            return 1;
+ 510   1      
+ 511   1          if(Data < 32){
+ 512   2            Data = 127;
+ 513   2            SetStartPage(Page);         //SetPageAddress(page); 
+ 514   2              SetStartColumn(Col);
+ 515   2            for(i = 0; i < 5; i++){
+ 516   3              WR1BData(Fonts[(Data - 32) * 5 + i]);
+ 517   3            }
+ 518   2            WR1BData(0x00); 
+ 519   2            return 1;
+ 520   2          }
+ 521   1          
+ 522   1          SetStartPage(Page);         //SetPageAddress(page); 
+ 523   1            SetStartColumn(Col);
+ 524   1          for(i = 0; i < 5; i++){
+ 525   2            WR1BData(Fonts[(Data - 32) * 5 + i]);
+ 526   2          }
+ 527   1          WR1BData(0x00); 
+ 528   1      
+ 529   1          return 0;
+ 530   1      }
+ 531          
+ 532          /*
+ 533            功能 : 用于state 使用5*7字模 输出一个字符的assic码  
+ 534            输入 : Page 和 Col 显示的位置
+ 535              Page : 
+ 536              Col : 最好6的倍数 
+ 537              Data : 字母
+ 538          */
+ 539          char OledAssicForState(unsigned char Page, unsigned char Col,unsigned char Data)
+ 540          {
+ 541   1          unsigned char i = 0;
+ 542   1          
+ 543   1          if(Page > 4 || Col > MAX_COLUMN)
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 10  
 
- 544   2            Data = 127;
- 545   2            SetStartPage(Page);         //SetPageAddress(page); 
- 546   2              SetStartColumn(Col);
- 547   2            for(i = 0; i < 5; i++){
- 548   3              WR1BData(Fonts[(Data - 32) * 5 + i] << 1);
- 549   3            }
- 550   2            WR1BData(0x00); 
- 551   2            return 1;
- 552   2          }
- 553   1          
- 554   1          SetStartPage(Page);         //SetPageAddress(page); 
- 555   1            SetStartColumn(Col);
- 556   1          for(i = 0; i < 5; i++){
- 557   2            WR1BData(Fonts[(Data - 32) * 5 + i] << 1);
- 558   2          }
- 559   1          WR1BData(0x00);
- 560   1      
- 561   1          return 0;
- 562   1      }
- 563          
- 564          
+ 544   1            return 1;
+ 545   1          if(Data < 32){
+ 546   2            Data = 127;
+ 547   2            SetStartPage(Page);         //SetPageAddress(page); 
+ 548   2              SetStartColumn(Col);
+ 549   2            for(i = 0; i < 5; i++){
+ 550   3              WR1BData(Fonts[(Data - 32) * 5 + i] << 1);
+ 551   3            }
+ 552   2            WR1BData(0x00); 
+ 553   2            return 1;
+ 554   2          }
+ 555   1          
+ 556   1          SetStartPage(Page);         //SetPageAddress(page); 
+ 557   1            SetStartColumn(Col);
+ 558   1          for(i = 0; i < 5; i++){
+ 559   2            WR1BData(Fonts[(Data - 32) * 5 + i] << 1);
+ 560   2          }
+ 561   1          WR1BData(0x00);
+ 562   1      
+ 563   1          return 0;
+ 564   1      }
  565          
- 566          /*
- 567            功能 : 使用5*7字模 输出ASSIC码的数据，最多输出64个字符
- 568            输入 : 字符串
- 569          */
- 570          void OledWriteMessage57(char *str)
- 571          {
- 572   1        unsigned char charNum = 0;
- 573   1        unsigned char i = 0;
- 574   1        unsigned char page = 0;
- 575   1        
- 576   1        while(*str){
- 577   2      
- 578   2          if(charNum < 16){     //第一排字
- 579   3            OledWriteAssic57(1, charNum * 6, *str);
- 580   3              }
- 581   2              else if(charNum < 32){
- 582   3            OledWriteAssic57(2, (charNum - 16) * 6, *str);
- 583   3      
- 584   3          }
- 585   2          else if(charNum < 48){
- 586   3            OledWriteAssic57(3, (charNum - 32) * 6, *str);
- 587   3      
- 588   3          }
- 589   2          else if(charNum < 64){
- 590   3            OledWriteAssic57(4, (charNum - 48) * 6, *str);
- 591   3      
- 592   3          }
- 593   2          else
- 594   2            break;
- 595   2          str++;
- 596   2          charNum++;
- 597   2        }
- 598   1        /*
- 599   1        while(1){
- 600   1      
- 601   1          if(charNum < 16){     //第一排字
- 602   1            OledWriteAssic57(1, charNum * 6, ' ');
- 603   1              }
- 604   1              else if(charNum < 32){
- 605   1            OledWriteAssic57(2, (charNum - 16) * 6, ' ');
-C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 09:44:05 PAGE 11  
+ 566          
+ 567          
+ 568          /*
+ 569            功能 : 使用5*7字模 输出ASSIC码的数据，最多输出64个字符
+ 570            输入 : 字符串
+ 571          */
+ 572          void OledWriteMessage57(char *str)
+ 573          {
+ 574   1        unsigned char charNum = 0;
+ 575   1        unsigned char i = 0;
+ 576   1        unsigned char page = 0;
+ 577   1        
+ 578   1        while(*str){
+ 579   2      
+ 580   2          if(charNum < 16){     //第一排字
+ 581   3            OledWriteAssic57(1, charNum * 6, *str);
+ 582   3              }
+ 583   2              else if(charNum < 32){
+ 584   3            OledWriteAssic57(2, (charNum - 16) * 6, *str);
+ 585   3      
+ 586   3          }
+ 587   2          else if(charNum < 48){
+ 588   3            OledWriteAssic57(3, (charNum - 32) * 6, *str);
+ 589   3      
+ 590   3          }
+ 591   2          else if(charNum < 64){
+ 592   3            OledWriteAssic57(4, (charNum - 48) * 6, *str);
+ 593   3      
+ 594   3          }
+ 595   2          else
+ 596   2            break;
+ 597   2          str++;
+ 598   2          charNum++;
+ 599   2        }
+ 600   1        /*
+ 601   1        while(1){
+ 602   1      
+ 603   1          if(charNum < 16){     //第一排字
+ 604   1            OledWriteAssic57(1, charNum * 6, ' ');
+ 605   1              }
+C51 COMPILER V9.52.0.0   STC15_OLED                                                        06/08/2016 14:58:01 PAGE 11  
 
- 606   1      
- 607   1          }
- 608   1          else if(charNum < 48){
- 609   1            OledWriteAssic57(3, (charNum - 32) * 6, ' ');
- 610   1      
- 611   1          }
- 612   1          else if(charNum < 64){
- 613   1            OledWriteAssic57(4, (charNum - 48) * 6, ' ');
- 614   1      
- 615   1          }
- 616   1          else
- 617   1            break;
- 618   1          charNum++;
- 619   1          }
- 620   1          */
- 621   1      }
- 622          
- 623          /*
- 624            功能 : 清除某行某列开始的值
- 625            输入 : Page 和 Col 的位置
- 626          */
- 627          char clearPageCol(unsigned char Page, unsigned char Col)
- 628          {
- 629   1        unsigned char i = Col;
- 630   1      
- 631   1        if(Page > 4 || Col > MAX_COLUMN)
- 632   1          return 1;
- 633   1        SetStartPage(Page);         //SetPageAddress(page); 
- 634   1          SetStartColumn(Col);
- 635   1        for(; i < MAX_COLUMN; i++){
- 636   2          WR1BData(0);
- 637   2        }
- 638   1        return 0;
- 639   1      }
+ 606   1              else if(charNum < 32){
+ 607   1            OledWriteAssic57(2, (charNum - 16) * 6, ' ');
+ 608   1      
+ 609   1          }
+ 610   1          else if(charNum < 48){
+ 611   1            OledWriteAssic57(3, (charNum - 32) * 6, ' ');
+ 612   1      
+ 613   1          }
+ 614   1          else if(charNum < 64){
+ 615   1            OledWriteAssic57(4, (charNum - 48) * 6, ' ');
+ 616   1      
+ 617   1          }
+ 618   1          else
+ 619   1            break;
+ 620   1          charNum++;
+ 621   1          }
+ 622   1          */
+ 623   1      }
+ 624          
+ 625          /*
+ 626            功能 : 清除某行某列开始的值
+ 627            输入 : Page 和 Col 的位置
+ 628          */
+ 629          char clearPageCol(unsigned char Page, unsigned char Col)
+ 630          {
+ 631   1        unsigned char i = Col;
+ 632   1      
+ 633   1        if(Page > 4 || Col > MAX_COLUMN)
+ 634   1          return 1;
+ 635   1        SetStartPage(Page);         //SetPageAddress(page); 
+ 636   1          SetStartColumn(Col);
+ 637   1        for(; i < MAX_COLUMN; i++){
+ 638   2          WR1BData(0);
+ 639   2        }
+ 640   1        return 0;
+ 641   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   2870    ----
+   CODE SIZE        =   2843    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----      48
    PDATA SIZE       =   ----    ----

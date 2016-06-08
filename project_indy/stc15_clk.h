@@ -1,7 +1,7 @@
 #ifndef __STC15_CLK_H__
 #define __STC15_CLK_H__
 #include "IAP15.h"
-
+#include "stc15_oled.h"
 
 /*
 软件复位
@@ -38,7 +38,7 @@
 输入 time : 
 	488.28us * time	
 */
-void WeakUpDownMode(unsigned char time);
+void WeakUpDownMode(unsigned int time);
 
 /*
 时钟输出

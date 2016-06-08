@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_UART
@@ -8,400 +8,404 @@ COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE stc15_uart.c LARGE BROWSE DEBUG OBJ
 line level    source
 
    1          #include "stc15_uart.h"
-   2          
-   3          bit   busy, busy2, busy3, busy4;
-   4          xdata uint8 rec_data[500];
-   5          uint16 rec_num = 0;
-   6          xdata   uint8   uart2_rec_data[201];
-   7          uint8   uart2_rec_cnt = 0;
-   8          
-   9          xdata   uint8   uart3_rec_data[20];
-  10          uint8   uart3_rec_cnt = 0;
-  11          
-  12          xdata   uint8   uart4_rec_data[200];
-  13          uint8   uart4_rec_cnt = 0;
-  14          
-  15          
-  16          //115200bps@22.1184MHz
-  17          void UartInit(void)    
-  18          {
-  19   1        
-  20   1        P3M1 &= ~0xC0; 
-  21   1        P3M0 |= 0xC0;
-  22   1      
-  23   1        ACC = P_SW1;
-  24   1        ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
-  25   1        P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
-  26   1      
-  27   1      //  ACC = P_SW1;
-  28   1      //    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
-  29   1      //    ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
-  30   1      //    P_SW1 = ACC;  
-  31   1        
-  32   1      //  ACC = P_SW1;
-  33   1      //  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=1
-  34   1      //  ACC |= S1_S1;               //(P1.6/RxD_3, P1.7/TxD_3)
-  35   1      //  P_SW1 = ACC;  
-  36   1      
-  37   1        PCON &= 0x7F;   //波特率不倍速
-  38   1        SCON = 0x50;    //8位数据,可变波特率
-  39   1        AUXR |= 0x40;   //定时器1时钟为Fosc,即1T
-  40   1        AUXR &= 0xFE;   //串口1选择定时器1为波特率发生器
-  41   1        TMOD &= 0x0F;   //清除定时器1模式位
-  42   1        TMOD |= 0x20;   //设定定时器1为8位自动重装方式
-  43   1        TL1 = 0xFA;   //设定定时初值
-  44   1        TH1 = 0xFA;   //设定定时器重装值
-  45   1        ET1 = 0;    //禁止定时器1中断
-  46   1        TR1 = 1;    //启动定时器1
-  47   1        
-  48   1        PS = 1;   // 拉高串口1的中断等级
+   2          #define DEBUG
+   3          
+   4          
+   5          bit   busy, busy2, busy3, busy4;
+   6          xdata uint8 rec_data[500];
+   7          uint16 rec_num = 0;
+   8          xdata   uint8   uart2_rec_data[201];
+   9          uint8   uart2_rec_cnt = 0;
+  10          
+  11          xdata   uint8   uart3_rec_data[20];
+  12          uint8   uart3_rec_cnt = 0;
+  13          
+  14          xdata   uint8   uart4_rec_data[200];
+  15          uint8   uart4_rec_cnt = 0;
+  16          
+  17          
+  18          //115200bps@22.1184MHz
+  19          void UartInit(void)    
+  20          {
+  21   1        
+  22   1        P3M1 &= ~0xC0; 
+  23   1        P3M0 |= 0xC0;
+  24   1      
+  25   1        ACC = P_SW1;
+  26   1        ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
+  27   1        P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
+  28   1      
+  29   1      //  ACC = P_SW1;
+  30   1      //    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
+  31   1      //    ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
+  32   1      //    P_SW1 = ACC;  
+  33   1        
+  34   1      //  ACC = P_SW1;
+  35   1      //  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=1
+  36   1      //  ACC |= S1_S1;               //(P1.6/RxD_3, P1.7/TxD_3)
+  37   1      //  P_SW1 = ACC;  
+  38   1      
+  39   1        PCON &= 0x7F;   //波特率不倍速
+  40   1        SCON = 0x50;    //8位数据,可变波特率
+  41   1        AUXR |= 0x40;   //定时器1时钟为Fosc,即1T
+  42   1        AUXR &= 0xFE;   //串口1选择定时器1为波特率发生器
+  43   1        TMOD &= 0x0F;   //清除定时器1模式位
+  44   1        TMOD |= 0x20;   //设定定时器1为8位自动重装方式
+  45   1        TL1 = 0xFA;   //设定定时初值
+  46   1        TH1 = 0xFA;   //设定定时器重装值
+  47   1        ET1 = 0;    //禁止定时器1中断
+  48   1        TR1 = 1;    //启动定时器1
   49   1        
-  50   1          ES = 1;        //使能串口中断
-  51   1          EA = 1;
-  52   1      
-  53   1      }
-  54          
-  55          
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 2   
+  50   1        PS = 1;   // 拉高串口1的中断等级
+  51   1        
+  52   1          ES = 1;        //使能串口中断
+  53   1          EA = 1;
+  54   1      
+  55   1      }
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 2   
 
-  56          /*----------------------------Send a byte data to UART
-  57          Input: dat (data to be sent)
-  58          Output:None
-  59          ----------------------------*/
-  60          void SendData(unsigned char dat)
-  61          {
-  62   1        while (busy);    //Wait for the completion of the previous data is sent
-  63   1        ACC = dat;    //Calculate the even parity bit P (PSW.0)
-  64   1      //  if (P)    //Set the parity bit according to P
-  65   1      //  {
-  66   1      //    #if (PARITYBIT == ODD_PARITY)
-  67   1      //    TB8 = 0;    //Set parity bit to 0
-  68   1      //    #elif (PARITYBIT == EVEN_PARITY)
-  69   1      //    TB8 = 1;    //Set parity bit to 1
-  70   1      //    #endif
-  71   1      //  }
-  72   1      //  else
-  73   1      //  {
-  74   1      //    #if (PARITYBIT == ODD_PARITY)
-  75   1      //    TB8 = 1;    //Set parity bit to 1
-  76   1      //    #elif (PARITYBIT == EVEN_PARITY)
-  77   1      //    TB8 = 0;    //Set parity bit to 0
-  78   1      //    #endif
-  79   1      //  }
-  80   1        busy = 1;
-  81   1        SBUF = ACC;    //Send data to UART buffer
-  82   1      }
-  83             
-  84          /*----------------------------Send a string to UART
-  85          Input: s (address of string)
-  86          Output:None
-  87          ----------------------------*/
-  88          
-  89          void SendString(char *s)
-  90          {
-  91   1        while (*s)    //Check the end of the string
-  92   1        {
-  93   2          SendData(*s++);    //Send current char and increment string ptr
-  94   2        }
-  95   1      }
-  96          
-  97          /*----------------------------UART interrupt service routine
-  98          ----------------------------*/
-  99          void Uart_Isr() interrupt 4 using 1
- 100          {
- 101   1        if (RI)
- 102   1        {
- 103   2          RI = 0;    //Clear receive interrupt flag
- 104   2          rec_data[rec_num++] = SBUF;    //P0 show UART data
- 105   2          //bit9 = RB8;    //P2.2 show parity bit
- 106   2      
- 107   2        }
- 108   1        if (TI)
- 109   1        {
- 110   2          TI = 0;    //Clear transmit interrupt flag
- 111   2          busy = 0;    //Clear transmit busy flag
- 112   2        }
- 113   1      }
- 114          
- 115          
- 116          /*----------------------------UART2 interrupt service routine
- 117          ----------------------------*/
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 3   
+  56          
+  57          
+  58          /*----------------------------Send a byte data to UART
+  59          Input: dat (data to be sent)
+  60          Output:None
+  61          ----------------------------*/
+  62          void SendData(unsigned char dat)
+  63          {
+  64   1        while (busy);    //Wait for the completion of the previous data is sent
+  65   1        ACC = dat;    //Calculate the even parity bit P (PSW.0)
+  66   1      //  if (P)    //Set the parity bit according to P
+  67   1      //  {
+  68   1      //    #if (PARITYBIT == ODD_PARITY)
+  69   1      //    TB8 = 0;    //Set parity bit to 0
+  70   1      //    #elif (PARITYBIT == EVEN_PARITY)
+  71   1      //    TB8 = 1;    //Set parity bit to 1
+  72   1      //    #endif
+  73   1      //  }
+  74   1      //  else
+  75   1      //  {
+  76   1      //    #if (PARITYBIT == ODD_PARITY)
+  77   1      //    TB8 = 1;    //Set parity bit to 1
+  78   1      //    #elif (PARITYBIT == EVEN_PARITY)
+  79   1      //    TB8 = 0;    //Set parity bit to 0
+  80   1      //    #endif
+  81   1      //  }
+  82   1        busy = 1;
+  83   1        SBUF = ACC;    //Send data to UART buffer
+  84   1      }
+  85             
+  86          /*----------------------------Send a string to UART
+  87          Input: s (address of string)
+  88          Output:None
+  89          ----------------------------*/
+  90          
+  91          void SendString(char *s)
+  92          {
+  93   1        while (*s)    //Check the end of the string
+  94   1        {
+  95   2          SendData(*s++);    //Send current char and increment string ptr
+  96   2        }
+  97   1      }
+  98          
+  99          /*----------------------------UART interrupt service routine
+ 100          ----------------------------*/
+ 101          void Uart_Isr() interrupt 4 using 1
+ 102          {
+ 103   1        if (RI)
+ 104   1        {
+ 105   2          RI = 0;    //Clear receive interrupt flag
+ 106   2          rec_data[rec_num++] = SBUF;    //P0 show UART data
+ 107   2          //bit9 = RB8;    //P2.2 show parity bit
+ 108   2      
+ 109   2        }
+ 110   1        if (TI)
+ 111   1        {
+ 112   2          TI = 0;    //Clear transmit interrupt flag
+ 113   2          busy = 0;    //Clear transmit busy flag
+ 114   2        }
+ 115   1      }
+ 116          
+ 117          
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 3   
 
- 118          void Uart2() interrupt 8 using 1
- 119          {
- 120   1        if (S2CON & S2RI)
- 121   1        {
- 122   2          S2CON &= ~S2RI;    //Clear receive interrupt flag
- 123   2              uart2_rec_data[uart2_rec_cnt++] = S2BUF;
- 124   2      
- 125   2        }
- 126   1        if (S2CON & S2TI)
- 127   1        {
- 128   2          S2CON &= ~S2TI;    //Clear transmit interrupt flag
- 129   2          busy2 = 0;    //Clear transmit busy flag
- 130   2        }
- 131   1      }
- 132          /*----------------------------Send a byte data to UART
- 133          Input: dat (data to be sent)
- 134          Output:None
- 135          ----------------------------*/
- 136          void SendData2(BYTE dat)
- 137          {
- 138   1        while (busy2);    //Wait for the completion of the previous data is sent
- 139   1        ACC = dat;    //Calculate the even parity bit P (PSW.0)
- 140   1      //  if (P)    //Set the parity bit according to P
- 141   1      //  {
- 142   1      //      #if (PARITYBIT2 == ODD_PARITY2)
- 143   1      //      S2CON &= ~S2TB8;    //Set parity bit to 0
- 144   1      //      #elif (PARITYBIT2 == EVEN_PARITY2)
- 145   1      //      S2CON |= S2TB8;    //Set parity bit to 1
- 146   1      //      #endif
- 147   1      //    }
- 148   1      //    else
- 149   1      //    {
- 150   1      //      #if (PARITYBIT2 == ODD_PARITY2)
- 151   1      //      S2CON |= S2TB8;    //Set parity bit to 1
- 152   1      //      #elif (PARITYBIT2 == EVEN_PARITY2)
- 153   1      //      S2CON &= ~S2TB8;    //Set parity bit to 0
- 154   1      //      #endif
- 155   1      //    }
- 156   1          busy2 = 1;
- 157   1          S2BUF = ACC;    //Send data to UART2 buffer
- 158   1      }
- 159          
- 160          
- 161          /*----------------------------Send a string to UART2
- 162          Input: s (address of string)
- 163          Output:None
- 164          ----------------------------*/
- 165          
- 166          void SendString2(char *s)
- 167          {
- 168   1        while (*s)    //Check the end of the string
- 169   1        {
- 170   2          SendData2(*s++);    //Send current char and increment string ptr
- 171   2        }
- 172   1      }
- 173          
- 174          
- 175          void Uart2Init()  //9600bps@22.1184MHz
- 176          {
- 177   1        P1M1 &= ~0x03;
- 178   1        P1M0 |= 0x03;
- 179   1        
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 4   
+ 118          /*----------------------------UART2 interrupt service routine
+ 119          ----------------------------*/
+ 120          void Uart2() interrupt 8 using 1
+ 121          {
+ 122   1        if (S2CON & S2RI)
+ 123   1        {
+ 124   2          S2CON &= ~S2RI;    //Clear receive interrupt flag
+ 125   2              uart2_rec_data[uart2_rec_cnt++] = S2BUF;
+ 126   2      
+ 127   2        }
+ 128   1        if (S2CON & S2TI)
+ 129   1        {
+ 130   2          S2CON &= ~S2TI;    //Clear transmit interrupt flag
+ 131   2          busy2 = 0;    //Clear transmit busy flag
+ 132   2        }
+ 133   1      }
+ 134          /*----------------------------Send a byte data to UART
+ 135          Input: dat (data to be sent)
+ 136          Output:None
+ 137          ----------------------------*/
+ 138          void SendData2(BYTE dat)
+ 139          {
+ 140   1        while (busy2);    //Wait for the completion of the previous data is sent
+ 141   1        ACC = dat;    //Calculate the even parity bit P (PSW.0)
+ 142   1      //  if (P)    //Set the parity bit according to P
+ 143   1      //  {
+ 144   1      //      #if (PARITYBIT2 == ODD_PARITY2)
+ 145   1      //      S2CON &= ~S2TB8;    //Set parity bit to 0
+ 146   1      //      #elif (PARITYBIT2 == EVEN_PARITY2)
+ 147   1      //      S2CON |= S2TB8;    //Set parity bit to 1
+ 148   1      //      #endif
+ 149   1      //    }
+ 150   1      //    else
+ 151   1      //    {
+ 152   1      //      #if (PARITYBIT2 == ODD_PARITY2)
+ 153   1      //      S2CON |= S2TB8;    //Set parity bit to 1
+ 154   1      //      #elif (PARITYBIT2 == EVEN_PARITY2)
+ 155   1      //      S2CON &= ~S2TB8;    //Set parity bit to 0
+ 156   1      //      #endif
+ 157   1      //    }
+ 158   1          busy2 = 1;
+ 159   1          S2BUF = ACC;    //Send data to UART2 buffer
+ 160   1      }
+ 161          
+ 162          
+ 163          /*----------------------------Send a string to UART2
+ 164          Input: s (address of string)
+ 165          Output:None
+ 166          ----------------------------*/
+ 167          
+ 168          void SendString2(char *s)
+ 169          {
+ 170   1        while (*s)    //Check the end of the string
+ 171   1        {
+ 172   2          SendData2(*s++);    //Send current char and increment string ptr
+ 173   2        }
+ 174   1      }
+ 175          
+ 176          
+ 177          void Uart2Init()  //9600bps@22.1184MHz
+ 178          {
+ 179   1        P1M1 &= ~0x03;
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 4   
 
- 180   1          P_SW2 &= ~S2_S0;            //S2_S0=0 (P1.0/RxD2, P1.1/TxD2)
- 181   1      //  P_SW2 |= S2_S0;             //S2_S0=1 (P4.6/RxD2_2, P4.7/TxD2_2)
- 182   1      
- 183   1      
- 184   1        S2CON = 0x50;   //8位数据,可变波特率
- 185   1        AUXR |= 0x04;   //定时器2时钟为Fosc,即1T
- 186   1        T2L = 0xC0;   //设定定时初值
- 187   1        T2H = 0xFD;   //设定定时初值
- 188   1        AUXR |= 0x10;   //启动定时器2
- 189   1      
- 190   1          IE2 = 0x01;                 //使能串口2中断
- 191   1          EA = 1;
- 192   1      }
- 193          
- 194          
- 195          void clear_rec_data()   //清空接收数据
- 196          {
- 197   1        uint16 i;
- 198   1        for(i=0;i<500;i++)
- 199   1            rec_data[i] = 0;
- 200   1        rec_num = 0;
- 201   1      }
- 202          
- 203          void clear_uart2_data()
- 204          {
- 205   1          char    i;
- 206   1        
- 207   1          for(i = 0;i < 100;i++)
- 208   1          {
- 209   2              uart2_rec_data[i] = 0;
- 210   2          }
- 211   1          uart2_rec_cnt = 0 ;
- 212   1      }
- 213          
- 214          /////////////////////////////////////////////////////////////
- 215          // Uart3
- 216          void Uart3Init()  //115200bps@22.1184MHz
- 217          {
- 218   1        //P_SW2 &= ~S3_S0;       //S3_S0=0 (P0.0/RxD3, P0.1/TxD3)
- 219   1          P_SW2 |= S3_S0;       //S3_S0=1 (P5.0/RxD3_2, P5.1/TxD3_2)
- 220   1        
- 221   1      //#if (PARITYBIT3 == NONE_PARITY3)
- 222   1      //    S3CON = 0x50;       //8位可变波特率
- 223   1      //#elif (PARITYBIT3 == ODD_PARITY3) || (PARITYBIT3 == EVEN_PARITY3) || (PARITYBIT3 == MARK_PARITY3)
- 224   1      //    S3CON = 0xda;       //9位可变波特率,校验位初始为1
- 225   1      //#elif (PARITYBIT3 == SPACE_PARITY3)
- 226   1      //    S3CON = 0xd2;       //9位可变波特率,校验位初始为0
- 227   1      //#endif
- 228   1        
- 229   1        S3CON = 0x10;   //8位数据,可变波特率
- 230   1        S3CON |= 0x40;    //串口3选择定时器3为波特率发生器
- 231   1        T4T3M |= 0x02;    //定时器3时钟为Fosc,即1T
- 232   1        T3L = 0xD0;   //设定定时初值
- 233   1        T3H = 0xFF;   //设定定时初值
- 234   1        T4T3M |= 0x08;    //启动定时器3
- 235   1      
- 236   1        IE2 |= 0x08;        //使能串口3中断
- 237   1        EA = 1;
- 238   1      
- 239   1      }
- 240          
- 241          
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 5   
+ 180   1        P1M0 |= 0x03;
+ 181   1        
+ 182   1          P_SW2 &= ~S2_S0;            //S2_S0=0 (P1.0/RxD2, P1.1/TxD2)
+ 183   1      //  P_SW2 |= S2_S0;             //S2_S0=1 (P4.6/RxD2_2, P4.7/TxD2_2)
+ 184   1      
+ 185   1      
+ 186   1        S2CON = 0x50;   //8位数据,可变波特率
+ 187   1        AUXR |= 0x04;   //定时器2时钟为Fosc,即1T
+ 188   1        T2L = 0xC0;   //设定定时初值
+ 189   1        T2H = 0xFD;   //设定定时初值
+ 190   1        AUXR |= 0x10;   //启动定时器2
+ 191   1      
+ 192   1          IE2 = 0x01;                 //使能串口2中断
+ 193   1          EA = 1;
+ 194   1      }
+ 195          
+ 196          
+ 197          void clear_rec_data()   //清空接收数据
+ 198          {
+ 199   1        uint16 i;
+ 200   1        for(i=0;i<500;i++)
+ 201   1            rec_data[i] = 0;
+ 202   1        rec_num = 0;
+ 203   1      }
+ 204          
+ 205          void clear_uart2_data()
+ 206          {
+ 207   1          char    i;
+ 208   1        
+ 209   1          for(i = 0;i < 100;i++)
+ 210   1          {
+ 211   2              uart2_rec_data[i] = 0;
+ 212   2          }
+ 213   1          uart2_rec_cnt = 0 ;
+ 214   1      }
+ 215          
+ 216          /////////////////////////////////////////////////////////////
+ 217          // Uart3
+ 218          void Uart3Init()  //115200bps@22.1184MHz
+ 219          {
+ 220   1        //P_SW2 &= ~S3_S0;       //S3_S0=0 (P0.0/RxD3, P0.1/TxD3)
+ 221   1          P_SW2 |= S3_S0;       //S3_S0=1 (P5.0/RxD3_2, P5.1/TxD3_2)
+ 222   1        
+ 223   1      //#if (PARITYBIT3 == NONE_PARITY3)
+ 224   1      //    S3CON = 0x50;       //8位可变波特率
+ 225   1      //#elif (PARITYBIT3 == ODD_PARITY3) || (PARITYBIT3 == EVEN_PARITY3) || (PARITYBIT3 == MARK_PARITY3)
+ 226   1      //    S3CON = 0xda;       //9位可变波特率,校验位初始为1
+ 227   1      //#elif (PARITYBIT3 == SPACE_PARITY3)
+ 228   1      //    S3CON = 0xd2;       //9位可变波特率,校验位初始为0
+ 229   1      //#endif
+ 230   1        
+ 231   1        S3CON = 0x10;   //8位数据,可变波特率
+ 232   1        S3CON |= 0x40;    //串口3选择定时器3为波特率发生器
+ 233   1        T4T3M |= 0x02;    //定时器3时钟为Fosc,即1T
+ 234   1        T3L = 0xD0;   //设定定时初值
+ 235   1        T3H = 0xFF;   //设定定时初值
+ 236   1        T4T3M |= 0x08;    //启动定时器3
+ 237   1      
+ 238   1        IE2 |= 0x08;        //使能串口3中断
+ 239   1        EA = 1;
+ 240   1      
+ 241   1      }
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 5   
 
  242          
- 243          /*----------------------------
- 244          UART3 中断服务程序
- 245          -----------------------------*/
- 246          void Uart3() interrupt 17 using 1
- 247          {
- 248   1          if (S3CON & S3RI)
- 249   1          {
- 250   2              S3CON &= ~S3RI;         //清除S3RI位
- 251   2              P0 = S3BUF;             //P0显示串口数据
- 252   2             // P2 = (S3CON & S3RB8);   //P2.2显示校验位
- 253   2          }
- 254   1          if (S3CON & S3TI)
- 255   1          {
- 256   2              S3CON &= ~S3TI;         //清除S3TI位
- 257   2              busy3 = 0;               //清忙标志
- 258   2          }
- 259   1      }
- 260          
- 261          /*----------------------------
- 262          发送串口数据
- 263          ----------------------------*/
- 264          void SendData3(BYTE dat)
- 265          {
- 266   1          while (busy3);               //等待前面的数据发送完成
- 267   1          ACC = dat;                  //获取校验位P (PSW.0)
- 268   1      //    if (P)                      //根据P来设置校验位
- 269   1      //    {
- 270   1      //#if (PARITYBIT3 == ODD_PARITY3)
- 271   1      //        S3CON &= ~S3TB8;        //设置校验位为0
- 272   1      //#elif (PARITYBIT3 == EVEN_PARITY3)
- 273   1      //        S3CON |= S3TB8;         //设置校验位为1
- 274   1      //#endif
- 275   1      //    }
- 276   1      //    else
- 277   1      //    {
- 278   1      //#if (PARITYBIT3 == ODD_PARITY3)
- 279   1      //        S3CON |= S3TB8;         //设置校验位为1
- 280   1      //#elif (PARITYBIT3 == EVEN_PARITY3)
- 281   1      //        S3CON &= ~S3TB8;        //设置校验位为0
- 282   1      //#endif
- 283   1      //    }
- 284   1          busy3 = 1;
- 285   1          S3BUF = ACC;                //写数据到UART3数据寄存器
- 286   1      }
- 287          
- 288          /*----------------------------
- 289          发送字符串
- 290          ----------------------------*/
- 291          void SendString3(char *s)
- 292          {
- 293   1          while (*s)                  //检测字符串结束标志
- 294   1          {
- 295   2              SendData3(*s++);         //发送当前字符
- 296   2          }
- 297   1      }
- 298          
- 299          
- 300          /////////////////////////////////////////////////////////////
- 301          //Uart4 //112500bps@22.1184MHz
- 302          
- 303          void Uart4Init(void)    
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 6   
+ 243          
+ 244          
+ 245          /*----------------------------
+ 246          UART3 中断服务程序
+ 247          -----------------------------*/
+ 248          void Uart3() interrupt 17 using 1
+ 249          {
+ 250   1          if (S3CON & S3RI)
+ 251   1          {
+ 252   2              S3CON &= ~S3RI;         //清除S3RI位
+ 253   2              P0 = S3BUF;             //P0显示串口数据
+ 254   2             // P2 = (S3CON & S3RB8);   //P2.2显示校验位
+ 255   2          }
+ 256   1          if (S3CON & S3TI)
+ 257   1          {
+ 258   2              S3CON &= ~S3TI;         //清除S3TI位
+ 259   2              busy3 = 0;               //清忙标志
+ 260   2          }
+ 261   1      }
+ 262          
+ 263          /*----------------------------
+ 264          发送串口数据
+ 265          ----------------------------*/
+ 266          void SendData3(BYTE dat)
+ 267          {
+ 268   1          while (busy3);               //等待前面的数据发送完成
+ 269   1          ACC = dat;                  //获取校验位P (PSW.0)
+ 270   1      //    if (P)                      //根据P来设置校验位
+ 271   1      //    {
+ 272   1      //#if (PARITYBIT3 == ODD_PARITY3)
+ 273   1      //        S3CON &= ~S3TB8;        //设置校验位为0
+ 274   1      //#elif (PARITYBIT3 == EVEN_PARITY3)
+ 275   1      //        S3CON |= S3TB8;         //设置校验位为1
+ 276   1      //#endif
+ 277   1      //    }
+ 278   1      //    else
+ 279   1      //    {
+ 280   1      //#if (PARITYBIT3 == ODD_PARITY3)
+ 281   1      //        S3CON |= S3TB8;         //设置校验位为1
+ 282   1      //#elif (PARITYBIT3 == EVEN_PARITY3)
+ 283   1      //        S3CON &= ~S3TB8;        //设置校验位为0
+ 284   1      //#endif
+ 285   1      //    }
+ 286   1          busy3 = 1;
+ 287   1          S3BUF = ACC;                //写数据到UART3数据寄存器
+ 288   1      }
+ 289          
+ 290          /*----------------------------
+ 291          发送字符串
+ 292          ----------------------------*/
+ 293          void SendString3(char *s)
+ 294          {
+ 295   1          while (*s)                  //检测字符串结束标志
+ 296   1          {
+ 297   2              SendData3(*s++);         //发送当前字符
+ 298   2          }
+ 299   1      }
+ 300          
+ 301          
+ 302          /////////////////////////////////////////////////////////////
+ 303          //Uart4 //112500bps@22.1184MHz
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 6   
 
- 304          {
- 305   1        
- 306   1      //  P_SW2 &= ~S4_S0;      //S4_S0=0 (P0.2/RxD4, P0.3/TxD4)
- 307   1        P_SW2 |= S4_S0;       //S4_S0=1 (P5.2/RxD4_2, P5.3/TxD4_2)
- 308   1        
- 309   1      //#if (PARITYBIT4 == NONE_PARITY4)
- 310   1      //    S4CON = 0x50;       //8位可变波特率
- 311   1      //#elif (PARITYBIT4 == ODD_PARITY4) || (PARITYBIT4 == EVEN_PARITY4) || (PARITYBIT4 == MARK_PARITY4)
- 312   1      //    S4CON = 0xda;       //9位可变波特率,校验位初始为1
- 313   1      //#elif (PARITYBIT44 == SPACE_PARITY4)
- 314   1      //    S4CON = 0xd2;       //9位可变波特率,校验位初始为0
- 315   1      //#endif
- 316   1        S4CON = 0x10;   //8位数据,可变波特率
- 317   1        S4CON |= 0x40;    //串口4选择定时器4为波特率发生器
- 318   1        T4T3M |= 0x20;    //定时器4时钟为Fosc,即1T
- 319   1        T4L = 0xD0;   //设定定时初值
- 320   1        T4H = 0xFF;   //设定定时初值
- 321   1        T4T3M |= 0x80;    //启动定时器4
- 322   1      
- 323   1        IE2 |= 0x10;                 //使能串口4中断
- 324   1          EA = 1;
- 325   1      }
- 326          
- 327          /*----------------------------
- 328          UART4 中断服务程序
- 329          -----------------------------*/
- 330          void Uart4() interrupt 18 using 1
- 331          {
- 332   1          if (S4CON & S4RI)
- 333   1          {
- 334   2              S4CON &= ~S4RI;         //清除S4RI位
- 335   2              uart4_rec_data[uart4_rec_cnt++] = S4BUF;             //P0显示串口数据
- 336   2            //  P2 = (S4CON & S4RB8);   //P2.2显示校验位
- 337   2          }
- 338   1          if (S4CON & S4TI)
- 339   1          {
- 340   2              S4CON &= ~S4TI;         //清除S4TI位
- 341   2              busy4 = 0;              //清忙标志
- 342   2          }
- 343   1      }
- 344          
- 345          /*----------------------------
- 346          发送串口数据
- 347          ----------------------------*/
- 348          void SendData4(BYTE dat)
- 349          {
- 350   1          while (busy4);               //等待前面的数据发送完成
- 351   1          ACC = dat;                  //获取校验位P (PSW.0)
- 352   1      //    if (P)                      //根据P来设置校验位
- 353   1      //    {
- 354   1      //#if (PARITYBIT4 == ODD_PARITY4)
- 355   1      //        S4CON &= ~S4TB8;        //设置校验位为0
- 356   1      //#elif (PARITYBIT4 == EVEN_PARITY4)
- 357   1      //        S4CON |= S4TB8;         //设置校验位为1
- 358   1      //#endif
- 359   1      //    }
- 360   1      //    else
- 361   1      //    {
- 362   1      //#if (PARITYBIT4 == ODD_PARITY4)
- 363   1      //        S4CON |= S4TB8;         //设置校验位为1
- 364   1      //#elif (PARITYBIT4 == EVEN_PARITY4)
- 365   1      //        S4CON &= ~S4TB8;        //设置校验位为0
-C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 09:44:05 PAGE 7   
+ 304          
+ 305          void Uart4Init(void)    
+ 306          {
+ 307   1        
+ 308   1      //  P_SW2 &= ~S4_S0;      //S4_S0=0 (P0.2/RxD4, P0.3/TxD4)
+ 309   1        P_SW2 |= S4_S0;       //S4_S0=1 (P5.2/RxD4_2, P5.3/TxD4_2)
+ 310   1        
+ 311   1      //#if (PARITYBIT4 == NONE_PARITY4)
+ 312   1      //    S4CON = 0x50;       //8位可变波特率
+ 313   1      //#elif (PARITYBIT4 == ODD_PARITY4) || (PARITYBIT4 == EVEN_PARITY4) || (PARITYBIT4 == MARK_PARITY4)
+ 314   1      //    S4CON = 0xda;       //9位可变波特率,校验位初始为1
+ 315   1      //#elif (PARITYBIT44 == SPACE_PARITY4)
+ 316   1      //    S4CON = 0xd2;       //9位可变波特率,校验位初始为0
+ 317   1      //#endif
+ 318   1        S4CON = 0x10;   //8位数据,可变波特率
+ 319   1        S4CON |= 0x40;    //串口4选择定时器4为波特率发生器
+ 320   1        T4T3M |= 0x20;    //定时器4时钟为Fosc,即1T
+ 321   1        T4L = 0xD0;   //设定定时初值
+ 322   1        T4H = 0xFF;   //设定定时初值
+ 323   1        T4T3M |= 0x80;    //启动定时器4
+ 324   1      
+ 325   1        IE2 |= 0x10;                 //使能串口4中断
+ 326   1          EA = 1;
+ 327   1      }
+ 328          
+ 329          /*----------------------------
+ 330          UART4 中断服务程序
+ 331          -----------------------------*/
+ 332          void Uart4() interrupt 18 using 1
+ 333          {
+ 334   1          if (S4CON & S4RI)
+ 335   1          {
+ 336   2              S4CON &= ~S4RI;         //清除S4RI位
+ 337   2              uart4_rec_data[uart4_rec_cnt++] = S4BUF;             //P0显示串口数据
+ 338   2            //  P2 = (S4CON & S4RB8);   //P2.2显示校验位
+ 339   2          }
+ 340   1          if (S4CON & S4TI)
+ 341   1          {
+ 342   2              S4CON &= ~S4TI;         //清除S4TI位
+ 343   2              busy4 = 0;              //清忙标志
+ 344   2          }
+ 345   1      }
+ 346          
+ 347          /*----------------------------
+ 348          发送串口数据
+ 349          ----------------------------*/
+ 350          void SendData4(BYTE dat)
+ 351          {
+ 352   1          while (busy4);               //等待前面的数据发送完成
+ 353   1          ACC = dat;                  //获取校验位P (PSW.0)
+ 354   1      //    if (P)                      //根据P来设置校验位
+ 355   1      //    {
+ 356   1      //#if (PARITYBIT4 == ODD_PARITY4)
+ 357   1      //        S4CON &= ~S4TB8;        //设置校验位为0
+ 358   1      //#elif (PARITYBIT4 == EVEN_PARITY4)
+ 359   1      //        S4CON |= S4TB8;         //设置校验位为1
+ 360   1      //#endif
+ 361   1      //    }
+ 362   1      //    else
+ 363   1      //    {
+ 364   1      //#if (PARITYBIT4 == ODD_PARITY4)
+ 365   1      //        S4CON |= S4TB8;         //设置校验位为1
+C51 COMPILER V9.52.0.0   STC15_UART                                                        06/08/2016 14:58:02 PAGE 7   
 
- 366   1      //#endif
- 367   1      //    }
- 368   1          busy4 = 1;
- 369   1          S4BUF = ACC;                //写数据到UART4数据寄存器
- 370   1      }
- 371          
- 372          /*----------------------------
- 373          发送字符串
- 374          ----------------------------*/
- 375          void SendString4(char *s)
- 376          {
- 377   1          while (*s)                  //检测字符串结束标志
- 378   1          {
- 379   2              SendData4(*s++);         //发送当前字符
- 380   2          }
- 381   1      }
- 382          
- 383          
+ 366   1      //#elif (PARITYBIT4 == EVEN_PARITY4)
+ 367   1      //        S4CON &= ~S4TB8;        //设置校验位为0
+ 368   1      //#endif
+ 369   1      //    }
+ 370   1          busy4 = 1;
+ 371   1          S4BUF = ACC;                //写数据到UART4数据寄存器
+ 372   1      }
+ 373          
+ 374          /*----------------------------
+ 375          发送字符串
+ 376          ----------------------------*/
+ 377          void SendString4(char *s)
+ 378          {
+ 379   1      #ifdef DEBUG
+ 380   1          while (*s)                  //检测字符串结束标志
+ 381   1          {
+ 382   2              SendData4(*s++);         //发送当前字符
+ 383   2          }
+ 384   1      #endif
+ 385   1      }
+ 386          
+ 387          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

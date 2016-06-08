@@ -178,8 +178,8 @@ double tempScan(void)
 */
 unsigned char checkCharging(void)
 {
-	P0M1 |= 0x80;
-	P0M0 &= ~0x01;	// 高阻输入
+	//P0M1 |= 0x80;
+	//P0M0 &= ~0x80;	// 本身为高阻输入
 	if(P07 == 1)
 	{
 		SendString4(" USB charge \n");

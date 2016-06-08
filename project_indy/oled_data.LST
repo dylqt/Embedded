@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 09:44:06 PAGE 1   
+C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 14:58:03 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE OLED_DATA
@@ -62,7 +62,7 @@ line level    source
   53                  0x7F, 0x04, 0x08, 0x10, 0x7F,// N
   54                  0x3E, 0x41, 0x41, 0x41, 0x3E,// O
   55                  0x7F, 0x09, 0x09, 0x09, 0x06,// P
-C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 09:44:06 PAGE 2   
+C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 14:58:03 PAGE 2   
 
   56                  0x3E, 0x41, 0x51, 0x21, 0x5E,// Q
   57                  0x7F, 0x09, 0x19, 0x29, 0x46,// R
@@ -126,7 +126,7 @@ line level    source
  115            {0x00,0x18,0x08,0x08,0x88,0x68,0x18,0x00,0x00,0x00,0x00,0x3E,0x01,0x00,0x00,0x00},/*"7",7*/ 
  116            {0x00,0x70,0x88,0x08,0x08,0x88,0x70,0x00,0x00,0x1C,0x22,0x21,0x21,0x22,0x1C,0x00},/*"8",8*/ 
  117            {0x00,0xF0,0x08,0x08,0x08,0x10,0xE0,0x00,0x00,0x01,0x12,0x22,0x22,0x11,0x0F,0x00},/*"9",9*/ 
-C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 09:44:06 PAGE 3   
+C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 14:58:03 PAGE 3   
 
  118            {0x00,0x00,0xC0,0x38,0xE0,0x00,0x00,0x00,0x20,0x3C,0x23,0x02,0x02,0x27,0x38,0x20},/*"A",10*/  
  119            {0x08,0xF8,0x88,0x88,0x88,0x70,0x00,0x00,0x20,0x3F,0x20,0x20,0x20,0x11,0x0E,0x00},/*"B",11*/  
@@ -190,7 +190,7 @@ line level    source
  177            {0x08,0x78,0x88,0x00,0x00,0xC8,0x38,0x08,0x00,0x00,0x07,0x38,0x0E,0x01,0x00,0x00},/*"V",47*/  
  178            {0x08,0xF8,0x00,0xF8,0x00,0xF8,0x08,0x00,0x00,0x03,0x3E,0x01,0x3E,0x03,0x00,0x00},/*"W",48*/  
  179            {0x08,0x18,0x68,0x80,0x80,0x68,0x18,0x08,0x20,0x30,0x2C,0x03,0x03,0x2C,0x30,0x20},/*"X",49*/  
-C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 09:44:06 PAGE 4   
+C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 14:58:03 PAGE 4   
 
  180            {0x08,0x38,0xC8,0x00,0xC8,0x38,0x08,0x00,0x00,0x00,0x20,0x3F,0x20,0x00,0x00,0x00},/*"Y",50*/  
  181            {0x10,0x08,0x08,0x08,0xC8,0x38,0x08,0x00,0x20,0x38,0x26,0x21,0x20,0x20,0x18,0x00},/*"Z",51*/  
@@ -254,84 +254,93 @@ line level    source
  238          };
  239          
  240          /*
-C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 09:44:06 PAGE 5   
+C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 14:58:03 PAGE 5   
 
  241            功能 : 显示蓝牙的链接状态
  242            输入 : 0 : 未连接 ; 1 : 已连接
  243          */
  244          void OledBtConnectState(unsigned char state)
- 245          {
- 246   1        OledFlushPage(0, 24, (unsigned char *)stateBtConnect[state], 6);  
- 247   1      }
- 248          
- 249          
+ 245          {
+ 246   1        if(state > 1)
+ 247   1          state = 1;
+ 248   1        OledFlushPage(0, 24, (unsigned char *)stateBtConnect[state], 6);  
+ 249   1      }
  250          
  251          
- 252          code unsigned char stateBattery[6][18] = {
- 253            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0x38,0x00}, // 100%
- 254            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 80%
- 255            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0xFE,0xFE,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 60%
- 256            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0x82,0x82,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 40%
- 257            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0x82,0x82,0x82,0x82,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 20%  
- 258            {0x00,0x00,0xFE,0xFE,0x82,0x82, 0x82,0x82,0x82,0x82,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 0%
- 259          };
- 260          
- 261          
- 262          /*
- 263            功能 : 显示电量状态
- 264            输入 : 0 : 100% 
- 265                1 : 80%
- 266                2 : 60%
- 267                3 : 40%
- 268                4 : 20%
- 269                5 : 0%
- 270          */
- 271          void OledBatteryState(unsigned char batteryState)
- 272          {
- 273   1        OledFlushPage(0, 66, (unsigned char *)stateBattery[batteryState], 18);  
- 274   1      }
- 275          
- 276          /*
- 277            功能 : 显示电量状态
- 278            输入 : 电量
- 279          */
- 280          void OledBatteryPower(unsigned char batteryPower)
- 281          {
- 282   1        unsigned char ten = batteryPower / 10;
- 283   1        unsigned char bits = batteryPower % 10;
- 284   1      
- 285   1        OledAssicForState(0, 48, '0' + ten);
- 286   1        OledAssicForState(0, 54, '0' + bits);
- 287   1        OledAssicForState(0, 60, '%');
- 288   1      }
- 289          
- 290          
- 291          
- 292          code unsigned char stateCharging[2][6] ={
- 293            {0x00, 0x00,0x00,0x00,0x00,0x00,},
- 294            {0x30,0x18,0xFE,0x30,0x18,0x00,}
- 295            
- 296          };
+ 252          
+ 253          
+ 254          code unsigned char stateBattery[6][18] = {
+ 255            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0x38,0x00}, // 100%
+ 256            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 80%
+ 257            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0xFE,0xFE,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 60%
+ 258            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0xFE,0xFE,0x82,0x82,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 40%
+ 259            {0x00,0x00,0xFE,0xFE,0xFE,0xFE, 0x82,0x82,0x82,0x82,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 20%  
+ 260            {0x00,0x00,0xFE,0xFE,0x82,0x82, 0x82,0x82,0x82,0x82,0x82,0x82,0x82,0x82,0xFE,0xFE,0x38,0x00}, // 0%
+ 261          };
+ 262          
+ 263          
+ 264          /*
+ 265            功能 : 显示电量状态
+ 266            输入 : 0 : 100% 
+ 267                1 : 80%
+ 268                2 : 60%
+ 269                3 : 40%
+ 270                4 : 20%
+ 271                5 : 0%
+ 272          */
+ 273          void OledBatteryState(unsigned char batteryState)
+ 274          {
+ 275   1        if(batteryState > 5)
+ 276   1          batteryState = 5;
+ 277   1        OledFlushPage(0, 66, (unsigned char *)stateBattery[batteryState], 18);  
+ 278   1      }
+ 279          
+ 280          /*
+ 281            功能 : 显示电量状态
+ 282            输入 : 电量
+ 283          */
+ 284          char OledBatteryPower(unsigned char batteryPower)
+ 285          {
+ 286   1        unsigned char ten = batteryPower / 10;
+ 287   1        unsigned char bits = batteryPower % 10;
+ 288   1      
+ 289   1        if(batteryPower > 100)
+ 290   1          return 1;
+ 291   1        OledAssicForState(0, 48, '0' + ten);
+ 292   1        OledAssicForState(0, 54, '0' + bits);
+ 293   1        OledAssicForState(0, 60, '%');
+ 294   1        return 0;
+ 295   1      }
+ 296          
  297          
- 298          /*
- 299            功能 : 显示充电状态
- 300            输入 : 0 : 未充电; 1 : 充电
- 301          */
- 302          void OledChargingState(unsigned char state)
-C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 09:44:06 PAGE 6   
+ 298          
+ 299          code unsigned char stateCharging[2][6] ={
+ 300            {0x00, 0x00,0x00,0x00,0x00,0x00,},
+ 301            {0x30,0x18,0xFE,0x30,0x18,0x00,}
+ 302            
+C51 COMPILER V9.52.0.0   OLED_DATA                                                         06/08/2016 14:58:03 PAGE 6   
 
- 303          {
- 304   1        OledFlushPage(0, 84, (unsigned char *)stateCharging[state], 6); 
- 305   1      }
- 306          
- 307          
- 308          
- 309          
- 310          
+ 303          };
+ 304          
+ 305          /*
+ 306            功能 : 显示充电状态
+ 307            输入 : 0 : 未充电; 1 : 充电
+ 308          */
+ 309          void OledChargingState(unsigned char state)
+ 310          {
+ 311   1        if(state > 1)
+ 312   1          state = 1;
+ 313   1        OledFlushPage(0, 84, (unsigned char *)stateCharging[state], 6); 
+ 314   1      }
+ 315          
+ 316          
+ 317          
+ 318          
+ 319          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    155    ----
+   CODE SIZE        =    189    ----
    CONSTANT SIZE    =   2228    ----
    XDATA SIZE       =   ----       1
    PDATA SIZE       =   ----    ----

@@ -329,9 +329,20 @@ int main()
 	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^								
 	
 	// --------------------- 业务 ---------------------------------
-	while(1){
-		Delay100ms(); 	// 100ms 处理一次事件
 
+	OledWriteWordByHex(3,0,WIRC_H);
+	OledWriteWordByHex(3,16,WIRC_L);
+	//WKTCL = 100;
+	// WKTCH = 0;
+	//WKTCH = 0x80;
+//	WeakUpDownMode(2000);
+	while(1){
+//		OledWriteMessage("Sleep");
+//		
+//		
+//		InPowerDownMode;			
+//		OledWriteMessage("Weekup");
+//		Delay999ms();
 		
 
 	}
