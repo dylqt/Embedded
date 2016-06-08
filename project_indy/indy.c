@@ -59,9 +59,9 @@ void uart2_sendMes(void)
     {
         SendData2(send_buf[i]);
 		
-			OledWriteWordByHex57(i / 16 + 1, i % 16, send_buf[i]);
+		//OledWriteWordByHex57(i / 16 + 1, i % 16, send_buf[i]);
     }
-        
+     //OledWriteMessageByHex57(send_buf, UART2_SEND_NUM);
     
 }
 
@@ -112,10 +112,11 @@ void process_packets()
 			data_addr_end = data_addr_fir + data_len*4 ; 
 			cmd_addr_fir = (data_len+2)*4+cmd_addr_fir;
 		//	cmd_addr_fir += 16;
+			OledWriteWordByHex(1, 0, 0xff);
 		}
 		else
 		{	
-
+			OledWriteWordByHex(1, 0, 0x44);
 			break;
 		}
  
@@ -127,55 +128,57 @@ void process_packets()
             { 
                 //epc_code[i] = rec_data[epc_data_addr + i];//epc
                 uart2_body.epc_code[i] = rec_data[epc_data_addr + i];//epc
+                OledWriteWordByHex(1, 0, 0xbb);
+								while(1);
             } 
+			
 		}
 	    if(cmd_type == 0x0006)
 	    {
-            
+            OledWriteWordByHex(1, 0, 0xcc);
             if(pkt_flag == 0x00)
-            {
+            {    
+            	OledWriteWordByHex(1, 0, 0xdd);
+                if(rec_data[data_addr_fir + 4] == 0xc2)
+                {
+                    sensor_data_addr = data_addr_fir + 12;
+                    
 
-                
-                    if(rec_data[data_addr_fir + 4] == 0xc2)
-                    {
-                        sensor_data_addr = data_addr_fir + 12;
-                        
-
-                        switch(uart2_body.cmd_type)
-        			    {
-        					case 1:
-        						for(i=0; i<2; i++)
-        					   {
-                                    uart2_body.val_data[i] = rec_data[sensor_data_addr +  i];
-        							
-        					   }
-        						rec_flag_cnt++;
-        						break;
-        					case 2:
-        						for(i=0; i<2; i++)
-        					   {
-        							uart2_body.val_data[i] = rec_data[sensor_data_addr +  i];
-        							
-        					    }
-        						rec_flag_cnt++;
-        						break;
-        					case 3:
-                                uart2_body.val_data[0] = 0;
-                                uart2_body.val_data[1] = rec_data[sensor_data_addr +  1];
-        						rec_flag_cnt++;
-        						break;
-        					default : 
-                                rec_flag    =   READ_NO_TAG;
-                                rec_flag_cnt = 0;
-                                break;
-        				}      
-                    }
-                    else
-                    {
-						// debug
-                        //SendString2("NOT  Read CMD\n");
-						OledWriteMessageByHex57(" NOT Read CMD ");
-                    }
+                    switch(uart2_body.cmd_type)
+    			    {
+    					case 1:
+    						for(i=0; i<2; i++)
+    					   {
+                                uart2_body.val_data[i] = rec_data[sensor_data_addr +  i];
+    							OledWriteWordByHex(1, 0, 0xcc);
+    					   }
+    						rec_flag_cnt++;
+    						break;
+    					case 2:
+    						for(i=0; i<2; i++)
+    					   {
+    							uart2_body.val_data[i] = rec_data[sensor_data_addr +  i];
+    							OledWriteWordByHex(1, 0, 0xdd);
+    					    }
+    						rec_flag_cnt++;
+    						break;
+    					case 3:
+                            uart2_body.val_data[0] = 0;
+                            uart2_body.val_data[1] = rec_data[sensor_data_addr +  1];
+    						rec_flag_cnt++;
+    						break;
+    					default : 
+                            rec_flag    =   READ_NO_TAG;
+                            rec_flag_cnt = 0;
+                            break;
+    				}      
+                }
+                else
+                {
+					// debug
+                    //SendString2("NOT  Read CMD\n");
+					OledWriteWordByHex(1, 0, 0x22);
+                }
                
                
 
@@ -186,6 +189,7 @@ void process_packets()
                    // SendString2("MAC detected an err\n");
                 //if(pkt_flag && 0x02)
                   //  SendString2("Tag did backscatter and err\n");
+                 OledWriteWordByHex(1, 0, 0x33);
                 break;
             }
         }
@@ -206,7 +210,7 @@ void indy_read_sensorcode()
     write_mac_register(0x0a06,0x0000,0x0000);
 	write_mac_register(0xf000,0x0000,0x0010);
 
-	Delay999ms();
+	Delay20ms();
 
     /*
     SendData2(rec_num );
@@ -223,7 +227,7 @@ void indy_read_sensorcode()
         process_packets();	//处理数据
         ES = 1;
     }	
-	OledWriteMessage57(" indy_readsensorcode end ");
+	//OledWriteMessage57(" indy_readsensorcode end ");
 }
 
 void indy_readrssi()
@@ -238,7 +242,7 @@ void indy_readrssi()
 	write_mac_register(HST_TAGACC_CNT,0x0000,0x0002);
 	write_mac_register(HST_TAGACC_ACCPWD,0x0000,0x0000);
 	write_mac_register(HST_CMD,0x0000,8);
-    Delay999ms();     
+    Delay20ms();     
     if(rec_data[0]  == 0x01 )
     {   
         ES = 0;
@@ -246,7 +250,7 @@ void indy_readrssi()
         ES = 1;
     }   
 
-	OledWriteMessage57(" indy_readrssi end ");
+	// OledWriteMessage57(" indy_readrssi end ");
 }
 
 
@@ -288,8 +292,8 @@ void indy_readtemp()
 		process_packets();	 //处理数据
 		ES = 1;
 	}	
-   SendString2(" indy_readtemp end \r\n");
-   OledWriteMessage57(" indy_readtemp end ");
+   // SendString2(" indy_readtemp end \r\n");
+   // OledWriteMessage57(" indy_readtemp end ");
 }
 
 int uart2_recv_proc()

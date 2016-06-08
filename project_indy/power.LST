@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   POWER                                                             06/03/2016 08:56:24 PAGE 1   
+C51 COMPILER V9.52.0.0   POWER                                                             06/08/2016 09:44:06 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE POWER
@@ -29,7 +29,7 @@ line level    source
   20   1         VSEL = 1;
   21   1         BYP = 1;
   22   1         
-  23   1         PG = 1;
+  23   1         PG = 1;  // 电源模块状态标志
   24   1         
   25   1         //SendString4("Sys = 0 \n ");
   26   1        //Delay999ms();
@@ -62,7 +62,7 @@ line level    source
   53   1        // 主循环一次采集一次
   54   1      //  batteryValue[getBatteryTimes++] = read_adc1024(4);
   55   1      //  
-C51 COMPILER V9.52.0.0   POWER                                                             06/03/2016 08:56:24 PAGE 2   
+C51 COMPILER V9.52.0.0   POWER                                                             06/08/2016 09:44:06 PAGE 2   
 
   56   1      //  if(getBatteryTimes == 10){  // 采集10次 输出一次
   57   1      //  
@@ -126,7 +126,7 @@ line level    source
  115   2      
  116   2      //    sprintf(output, "BAT %d\% \n ", batteryPercentage);
  117   2      //    SendData4(0xbb);
-C51 COMPILER V9.52.0.0   POWER                                                             06/03/2016 08:56:24 PAGE 3   
+C51 COMPILER V9.52.0.0   POWER                                                             06/08/2016 09:44:06 PAGE 3   
 
  118   2      //    SendData4(batteryValue);
  119   2          
@@ -190,7 +190,7 @@ line level    source
  177            P07 读到 高或低电平
  178          */
  179          unsigned char checkCharging(void)
-C51 COMPILER V9.52.0.0   POWER                                                             06/03/2016 08:56:24 PAGE 4   
+C51 COMPILER V9.52.0.0   POWER                                                             06/08/2016 09:44:06 PAGE 4   
 
  180          {
  181   1        P0M1 |= 0x80;

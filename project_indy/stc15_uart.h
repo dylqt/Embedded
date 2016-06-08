@@ -25,7 +25,7 @@ void SendString(char *s);
 void UartInit(void);
 
 //////////////////////////////////////////////////////////////
-// Uart2 (for bt)	//112500bps@22.1184MHz
+// Uart2 (for bt)	// 9600bps@22.1184MHz
 
 #define NONE_PARITY2     0       //无校验
 #define ODD_PARITY2      1       //奇校验
@@ -105,5 +105,8 @@ extern bit busy4;
 void Uart4Init(void);
 void SendData4(BYTE dat);
 void SendString4(char *s);
+
+extern xdata   uint8   uart4_rec_data[200];
+extern uint8   uart4_rec_cnt;
 
 #endif

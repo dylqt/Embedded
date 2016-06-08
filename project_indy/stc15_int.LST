@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/08/2016 09:44:06 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_INT
@@ -24,203 +24,198 @@ line level    source
   15   1        temp_t0_int_cnt++;
   16   1        vcc_t0_int_cnt++;
   17   1        
-  18   1        SendData((unsigned char)temp_t0_int_cnt);
-  19   1        
-  20   1      //  if(result.battery_pct > batTmp)
-  21   1      //    result.battery_pct = batTmp;    // 取最大的电池电量
-  22   1      //  if(result.temp_power_chip > tempTmp)  
-  23   1      //    result.temp_power_chip = batTmp;  // 取最高的温度
-  24   1        
-  25   1        if(temp_t0_int_cnt >= 250)    // 基数20ms * 250 = 5s  更新温度
-  26   1        {
-  27   2      //      SendData4(0xff);
-  28   2      //    SendString4("temp of  u14 =  X  deg \n ");
-  29   2          result.temp_power_chip = tempScan();
-  30   2          OledWriteAssic57(3, 0, (unsigned char)result.temp_power_chip / 10 + '0');
-  31   2          OledWriteAssic57(3, 6, ((unsigned char)result.temp_power_chip % 10) + '0');
-  32   2          OledWriteAssic57(3, 12, '.');
-  33   2          OledWriteAssic57(3, 18, ((unsigned int)(result.temp_power_chip * 100) % 100) / 10 + '0');
-  34   2          OledWriteAssic57(3, 24, (unsigned int)(result.temp_power_chip * 100) % 10 + '0');
-  35   2      
-  36   2          // 清零
-  37   2          result.temp_power_chip = 0;
-  38   2          
-  39   2          temp_t0_int_cnt = 0;
-  40   2        }
-  41   1        if(vcc_t0_int_cnt >= 3000 )   // 基数20ms * 3000 = 60000ms; 1min  更新电量
-  42   1        {
-  43   2          result.battery_pct = getBatteryPercent();
-  44   2          //SendString4("temp of  u14 =  X  deg \n ");
-  45   2          OledWriteAssic57(4, 0, result.battery_pct / 10 + '0');
-  46   2          OledWriteAssic57(4, 6, result.battery_pct % 10 + '0');
-  47   2      
-  48   2          //清零
-  49   2          result.battery_pct = 0;
-  50   2          
-  51   2          vcc_t0_int_cnt = 0;
-  52   2        }
-  53   1        
-  54   1      }
-  55          
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 2   
+  18   1        
+  19   1      }
+  20          
+  21          void t0IntInit(void)
+  22          {
+  23   1         // AUXR |= 0x80;                    //定时器0为1T模式  // max 2.9ms 
+  24   1          AUXR &= 0x7f;                   //定时器0为12T模式  // max 35.5ms
+  25   1          TMOD &= 0xf0;                    //设置定时器0为16位自动重装载外部记数模式
+  26   1      
+  27   1          PT0 = 0;    //优先级最低
+  28   1        TL0 = 0x00;   //设置定时初值
+  29   1        TH0 = 0x70;   //设置定时初值  // 定时基数20ms
+  30   1        TF0 = 0;    //清除TF0标志
+  31   1        TR0 = 1;                        //定时器0开始工作
+  32   1          ET0 = 1;                        //开定时器0中断
+  33   1      
+  34   1          EA = 1;
+  35   1      }
+  36          
+  37          void freshStateLine()
+  38          {
+  39   1        
+  40   1        if(temp_t0_int_cnt >= 250)    // 基数20ms * 250 = 5s  更新温度
+  41   1        {
+  42   2      //    SendString4("temp of  u14 =  X  deg \n ");
+  43   2          result.temp_power_chip = tempScan();
+  44   2      //    OledWriteAssic57(3, 0, (unsigned char)result.temp_power_chip / 10 + '0');
+  45   2      //    OledWriteAssic57(3, 6, ((unsigned char)result.temp_power_chip % 10) + '0');
+  46   2      //    OledWriteAssic57(3, 12, '.');
+  47   2      //    OledWriteAssic57(3, 18, ((unsigned int)(result.temp_power_chip * 100) % 100) / 10 + '0');
+  48   2      //    OledWriteAssic57(3, 24, (unsigned int)(result.temp_power_chip * 100) % 10 + '0');
+  49   2      
+  50   2          // 清零
+  51   2          result.temp_power_chip = 0;
+  52   2          
+  53   2          temp_t0_int_cnt = 0;
+  54   2        }
+  55   1        if(vcc_t0_int_cnt >= 3000 )   // 基数20ms * 3000 = 60000ms; 1min  更新电量
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/08/2016 09:44:06 PAGE 2   
 
-  56          void t0IntInit(void)
-  57          {
-  58   1         // AUXR |= 0x80;                    //定时器0为1T模式  // max 2.9ms 
-  59   1          AUXR &= 0x7f;                   //定时器0为12T模式  // max 35.5ms
-  60   1          TMOD &= 0xf0;                    //设置定时器0为16位自动重装载外部记数模式
-  61   1      
-  62   1          PT0 = 0;    //优先级最低
-  63   1        TL0 = 0x00;   //设置定时初值
-  64   1        TH0 = 0x70;   //设置定时初值  // 定时基数20ms
-  65   1        TF0 = 0;    //清除TF0标志
-  66   1        TR0 = 1;                        //定时器0开始工作
-  67   1          ET0 = 1;                        //开定时器0中断
-  68   1      
-  69   1          EA = 1;
-  70   1      }
-  71          
-  72          
-  73          
-  74          
-  75          
-  76          // 定时器3中断初始化 12T
-  77          void t3IntInit(void)
-  78          {
-  79   1      //  T4T3M |= 0x02;                  //定时器3为1T模式
-  80   1          T4T3M &= ~0x02;                 //定时器3为12T模式
-  81   1      
-  82   1          T3L = 0x01;                 //初始化计时值
-  83   1          T3H = 0x00;
-  84   1          
-  85   1          T4T3M |= 0x08;                  //定时器3开始计时
-  86   1          IE2 |= 0x20;                    //开定时器3中断
-  87   1          
-  88   1          EA = 1;
-  89   1        
-  90   1      }
+  56   1        {
+  57   2          result.battery_pct = getBatteryPercent();
+  58   2          
+  59   2      //    OledWriteAssic57(4, 0, result.battery_pct / 10 + '0');
+  60   2      //    OledWriteAssic57(4, 6, result.battery_pct % 10 + '0');
+  61   2      
+  62   2          //清零
+  63   2          result.battery_pct = 0;
+  64   2          
+  65   2          vcc_t0_int_cnt = 0;
+  66   2        }
+  67   1      }
+  68          
+  69          
+  70          
+  71          // 定时器3中断初始化 12T
+  72          void t3IntInit(void)
+  73          {
+  74   1      //  T4T3M |= 0x02;                  //定时器3为1T模式
+  75   1          T4T3M &= ~0x02;                 //定时器3为12T模式
+  76   1      
+  77   1          T3L = 0x01;                 //初始化计时值
+  78   1          T3H = 0x00;
+  79   1          
+  80   1          T4T3M |= 0x08;                  //定时器3开始计时
+  81   1          IE2 |= 0x20;                    //开定时器3中断
+  82   1          
+  83   1          EA = 1;
+  84   1        
+  85   1      }
+  86          
+  87          
+  88          
+  89          
+  90          
   91          
   92          
   93          
-  94          
-  95          
-  96          
-  97          
-  98          
-  99          //-----------------------------------------
- 100          // INT0中断服务程序
- 101          void exint0() interrupt 0       //INT0中断入口
- 102          {
- 103   1         // P10 = !P10;                 //将测试口取反
- 104   1      }
- 105          
- 106          //-----------------------------------------------
- 107          
- 108          void Int0Init()
- 109          {
- 110   1          INT0 = 1;
- 111   1          IT0 = 1;                    //设置INT0的中断类型 (1:仅下降沿 0:上升沿和下降沿)
- 112   1          EX0 = 1;                    //使能INT0中断
- 113   1          EA = 1;
- 114   1      }
- 115          
- 116          
- 117          //-----------------------------------------
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 3   
+  94          //-----------------------------------------
+  95          // INT0中断服务程序
+  96          void exint0() interrupt 0       //INT0中断入口
+  97          {
+  98   1         // P10 = !P10;                 //将测试口取反
+  99   1      }
+ 100          
+ 101          //-----------------------------------------------
+ 102          
+ 103          void Int0Init()
+ 104          {
+ 105   1          INT0 = 1;
+ 106   1          IT0 = 1;                    //设置INT0的中断类型 (1:仅下降沿 0:上升沿和下降沿)
+ 107   1          EX0 = 1;                    //使能INT0中断
+ 108   1          EA = 1;
+ 109   1      }
+ 110          
+ 111          
+ 112          //-----------------------------------------
+ 113          // INT1中断服务程序
+ 114          void exint1() interrupt 2       //INT1中断入口
+ 115          {
+ 116   1          //P10 = !P10;                 //将测试口取反
+ 117   1          //FLAG = INT1;                //保存INT1口的状态, INT1=0(下降沿); INT1=1(上升沿)
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/08/2016 09:44:06 PAGE 3   
 
- 118          // INT1中断服务程序
- 119          void exint1() interrupt 2       //INT1中断入口
- 120          {
- 121   1          //P10 = !P10;                 //将测试口取反
- 122   1          //FLAG = INT1;                //保存INT1口的状态, INT1=0(下降沿); INT1=1(上升沿)
- 123   1      }
- 124          
- 125          //-----------------------------------------------
- 126          
- 127          void Int1Init()
- 128          {
- 129   1          INT1 = 1;
- 130   1          IT1 = 0;                    //设置INT1的中断类型 (1:仅下降沿 0:上升沿和下降沿)
- 131   1          EX1 = 1;                    //使能INT1中断
- 132   1          EA = 1;
- 133   1      
- 134   1      }
- 135          
- 136          
- 137          //-----------------------------------------------
- 138          // INT2中断服务程序
- 139          void exint2() interrupt 10          //INT2中断入口
- 140          {
- 141   1      //    P10 = !P10;                     //将测试口取反
- 142   1          
- 143   1      //  INT_CLKO &= 0xEF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
- 144   1      //  INT_CLKO |= 0x10;               //然后再开中断即可
- 145   1      }
- 146          
- 147          void Int2Init()
- 148          {
- 149   1          INT_CLKO |= 0x10;               //(EX2 = 1)使能INT2中断
- 150   1          EA = 1;
- 151   1      
- 152   1      }
- 153          
- 154          
- 155          //-----------------------------------------------
- 156          // INT3 中断服务程序
- 157          void exint3() interrupt 11          //INT3中断入口
- 158          {
- 159   1       //   P10 = !P10;                     //将测试口取反
- 160   1          
- 161   1      //  INT_CLKO &= 0xDF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
- 162   1      //  INT_CLKO |= 0x20;               //然后再开中断即可
- 163   1      }
- 164          
- 165          void Int3Init()
- 166          {
- 167   1          INT_CLKO |= 0x20;               //(EX3 = 1)使能INT3中断
- 168   1          EA = 1;
- 169   1      }
- 170          
- 171          //-----------------------------------------------
- 172          // INT4 中断服务程序
- 173          void exint4() interrupt 16          //INT3中断入口
- 174          {
- 175   1      //    P10 = !P10;                     //将测试口取反
- 176   1          
- 177   1      //  INT_CLKO &= 0xBF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
- 178   1      //  INT_CLKO |= 0x40;               //然后再开中断即可
- 179   1      }
-C51 COMPILER V9.52.0.0   STC15_INT                                                         06/03/2016 08:56:24 PAGE 4   
+ 118   1      }
+ 119          
+ 120          //-----------------------------------------------
+ 121          
+ 122          void Int1Init()
+ 123          {
+ 124   1          INT1 = 1;
+ 125   1          IT1 = 0;                    //设置INT1的中断类型 (1:仅下降沿 0:上升沿和下降沿)
+ 126   1          EX1 = 1;                    //使能INT1中断
+ 127   1          EA = 1;
+ 128   1      
+ 129   1      }
+ 130          
+ 131          
+ 132          //-----------------------------------------------
+ 133          // INT2中断服务程序
+ 134          void exint2() interrupt 10          //INT2中断入口
+ 135          {
+ 136   1      //    P10 = !P10;                     //将测试口取反
+ 137   1          
+ 138   1      //  INT_CLKO &= 0xEF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
+ 139   1      //  INT_CLKO |= 0x10;               //然后再开中断即可
+ 140   1      }
+ 141          
+ 142          void Int2Init()
+ 143          {
+ 144   1          INT_CLKO |= 0x10;               //(EX2 = 1)使能INT2中断
+ 145   1          EA = 1;
+ 146   1      
+ 147   1      }
+ 148          
+ 149          
+ 150          //-----------------------------------------------
+ 151          // INT3 中断服务程序
+ 152          void exint3() interrupt 11          //INT3中断入口
+ 153          {
+ 154   1       //   P10 = !P10;                     //将测试口取反
+ 155   1          
+ 156   1      //  INT_CLKO &= 0xDF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
+ 157   1      //  INT_CLKO |= 0x20;               //然后再开中断即可
+ 158   1      }
+ 159          
+ 160          void Int3Init()
+ 161          {
+ 162   1          INT_CLKO |= 0x20;               //(EX3 = 1)使能INT3中断
+ 163   1          EA = 1;
+ 164   1      }
+ 165          
+ 166          //-----------------------------------------------
+ 167          // INT4 中断服务程序
+ 168          void exint4() interrupt 16          //INT3中断入口
+ 169          {
+ 170   1      //    P10 = !P10;                     //将测试口取反
+ 171   1          
+ 172   1      //  INT_CLKO &= 0xBF;               //若需要手动清除中断标志,可先关闭中断,此时系统会自动清除内部的中断标志
+ 173   1      //  INT_CLKO |= 0x40;               //然后再开中断即可
+ 174   1      }
+ 175          
+ 176          void Int4Init()
+ 177          {
+ 178   1          INT_CLKO |= 0x40;               //(EX4 = 1)使能INT4中断
+ 179   1          EA = 1;
+C51 COMPILER V9.52.0.0   STC15_INT                                                         06/08/2016 09:44:06 PAGE 4   
 
- 180          
- 181          void Int4Init()
- 182          {
- 183   1          INT_CLKO |= 0x40;               //(EX4 = 1)使能INT4中断
- 184   1          EA = 1;
- 185   1      
- 186   1      }
- 187          
- 188          
- 189          //-----------------------------------------
- 190          // 低压检测(LVD)中断
- 191          void LVD_ISR() interrupt 6 using 1
- 192          {
- 193   1      //    P11 = !P11;                     //测试口
- 194   1          PCON &= ~LVDF;                  //向PCON.5写0清LVD中断
- 195   1      }
- 196          
- 197          void LvdIntInit()
- 198          {
- 199   1          PCON &= ~LVDF;                  //上电后需要清LVD中断标志位
- 200   1          ELVD = 1;                       //使能LVD中断
- 201   1          EA = 1;                         //打开总中断开关
- 202   1          
- 203   1      }
- 204          
+ 180   1      
+ 181   1      }
+ 182          
+ 183          
+ 184          //-----------------------------------------
+ 185          // 低压检测(LVD)中断
+ 186          void LVD_ISR() interrupt 6 using 1
+ 187          {
+ 188   1      //    P11 = !P11;                     //测试口
+ 189   1          PCON &= ~LVDF;                  //向PCON.5写0清LVD中断
+ 190   1      }
+ 191          
+ 192          void LvdIntInit()
+ 193          {
+ 194   1          PCON &= ~LVDF;                  //上电后需要清LVD中断标志位
+ 195   1          ELVD = 1;                       //使能LVD中断
+ 196   1          EA = 1;                         //打开总中断开关
+ 197   1          
+ 198   1      }
+ 199          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    490    ----
+   CODE SIZE        =    252    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      4       5
    PDATA SIZE       =   ----    ----

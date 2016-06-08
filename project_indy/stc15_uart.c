@@ -9,7 +9,7 @@ uint8   uart2_rec_cnt = 0;
 xdata   uint8   uart3_rec_data[20];
 uint8   uart3_rec_cnt = 0;
 
-xdata   uint8   uart4_rec_data[20];
+xdata   uint8   uart4_rec_data[200];
 uint8   uart4_rec_cnt = 0;
 
 
@@ -20,14 +20,14 @@ void UartInit(void)
 	P3M1 &= ~0xC0; 
 	P3M0 |= 0xC0;
 
-//	ACC = P_SW1;
-//  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
-//	P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
-
 	ACC = P_SW1;
-    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
-    ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
-    P_SW1 = ACC;  
+  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
+	P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
+
+//	ACC = P_SW1;
+//    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
+//    ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
+//    P_SW1 = ACC;  
   
 //  ACC = P_SW1;
 //  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=1
@@ -44,6 +44,8 @@ void UartInit(void)
 	TH1 = 0xFA;		//设定定时器重装值
 	ET1 = 0;		//禁止定时器1中断
 	TR1 = 1;		//启动定时器1
+	
+	PS = 1;		// 拉高串口1的中断等级
 	
     ES = 1;        //使能串口中断
     EA = 1;
@@ -172,6 +174,8 @@ void SendString2(char *s)
 
 void Uart2Init()	//9600bps@22.1184MHz
 {
+	P1M1 &= ~0x03;
+	P1M0 |= 0x03;
 	
     P_SW2 &= ~S2_S0;            //S2_S0=0 (P1.0/RxD2, P1.1/TxD2)
 //  P_SW2 |= S2_S0;             //S2_S0=1 (P4.6/RxD2_2, P4.7/TxD2_2)
@@ -328,7 +332,7 @@ void Uart4() interrupt 18 using 1
     if (S4CON & S4RI)
     {
         S4CON &= ~S4RI;         //清除S4RI位
-        P0 = S4BUF;             //P0显示串口数据
+        uart4_rec_data[uart4_rec_cnt++] = S4BUF;             //P0显示串口数据
       //  P2 = (S4CON & S4RB8);   //P2.2显示校验位
     }
     if (S4CON & S4TI)
@@ -372,7 +376,7 @@ void SendString4(char *s)
 {
     while (*s)                  //检测字符串结束标志
     {
-        SendData(*s++);         //发送当前字符
+        SendData4(*s++);         //发送当前字符
     }
 }
 

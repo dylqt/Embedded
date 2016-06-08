@@ -140,18 +140,27 @@ void OledExitingSleepMode()
 }
 
 
-void SetStartPage(uint8_t page)	 //页模式下,设置起始页
+char SetStartPage(uint8_t page)	 //页模式下,设置起始页
 {
+	if(page > 4){
+		WR1BCmd( 0xB0 | (4 & 0x0F) );
+		return 1;
+	}
 	WR1BCmd( 0xB0 | ((page) & 0x0F) );
+	return 0;
 }
 
-void SetStartColumn(uint8_t ColumnAddress)   //页模式下,设置起始列
+char SetStartColumn(uint8_t ColumnAddress)   //页模式下,设置起始列
 {
-	   //SH1106,X轴偏移-2,ssd1306 x轴偏移-32
-	   ColumnAddress += 32;
-	  
-	   WR1BCmd(0x0f &  ColumnAddress ); 			   //Set Lower Column (00H - 0FH) 
-	   WR1BCmd(0x0f & (ColumnAddress >> 4) | 0x10 ); 		//Set Higher Column	(10H - 1FH)    
+	if(ColumnAddress > MAX_COLUMN){
+		return 1;
+	}
+	//SH1106,X轴偏移-2,ssd1306 x轴偏移-32
+	ColumnAddress += 32;
+
+	WR1BCmd(0x0f &  ColumnAddress ); 			   //Set Lower Column (00H - 0FH) 
+	WR1BCmd(0x0f & (ColumnAddress >> 4) | 0x10 ); 		//Set Higher Column	(10H - 1FH)
+		return 0;
 }
 
 
@@ -178,11 +187,14 @@ void OledClear(void)		//此版本为line mode
 	功能 : 刷新整个界面
 	输入 : 整个界面的位值
 */
-void OledFlush(unsigned char *buf)
+char OledFlush(unsigned char *buf)
 {
 	unsigned char page = 0;	  
 	uint8_t column = 0;
 	unsigned int n = 0;
+
+	if(buf == 0)
+		return 1;
     for(;page < MAX_PAGE; page++)
     {	
     	column = 0;
@@ -192,9 +204,32 @@ void OledFlush(unsigned char *buf)
         {
             WR1BData(buf[n++]);
         }
-    }	
+    }
+	return 0;	
 }
 
+
+/*
+	功能 : 刷新某一行
+	输入 : 某一行开始位置，和数据
+*/
+char OledFlushPage(unsigned char Page, unsigned char Col,unsigned char *buf, unsigned char bufNum)
+{	 
+	uint8_t column = 0;
+	
+	if(Page > 4 || Col > MAX_COLUMN || buf == NULL || Col + bufNum > MAX_COLUMN)
+		return 1;
+	
+    SetStartPage(Page);		//SetPageAddress(page); 
+    SetStartColumn(Col);		//SetColumnAddress(0);
+    
+    for(;column < bufNum && Col + column < MAX_COLUMN; column++)
+    {
+        WR1BData(buf[column]);
+    }	
+
+	return 0;
+}
 
 
 /*
@@ -205,6 +240,7 @@ void OledWriteMessage(char *str)
 {
 	unsigned char charNum = 0;
 	unsigned char i = 0;
+	
 	while(*str){
 
 		if(charNum < 12){			//第一排字
@@ -282,11 +318,15 @@ void OledWriteMessage(char *str)
 		Page : 1 或 3 ; 总共5行，从0开始， 第一行只有7位，一个字符需要2个page，所以为1和3page开始
 		Col : 最好8的倍数 因为每个字符需要两位16列
 */
-void OledWriteWordByHex(unsigned char Page, unsigned char Col, unsigned char Data)
+char OledWriteWordByHex(unsigned char Page, unsigned char Col, unsigned char Data)
 {
 	unsigned char i = 0;
 	unsigned char left = (Data >> 4);
 	unsigned char right = (Data & 0x0f);
+	
+	if(Page > 4 || Col > MAX_COLUMN)
+		return 1;
+	
 	SetStartPage(Page);					//SetPageAddress(page); 
     SetStartColumn(Col);
 	for(i = 0; i < 8; i++){
@@ -311,26 +351,31 @@ void OledWriteWordByHex(unsigned char Page, unsigned char Col, unsigned char Dat
 	for(i = 0; i < 8; i++){
 			WR1BData(Num[right][i + 8]);
 	}
+	return 0;
 }
 
 
 /*
 	功能 : 输出HEX码的数据，最多输出24个数字，即12个字符
-	输入 : 数组数据
+	输入 : 数组数据，以及数组的长度
+	输出 : 当数组超过12个字符时，显示12个字符，并返回错误代码
 */
-void OledWriteMessageByHex(unsigned char *Data)
+char OledWriteBufByHex(unsigned char *Data, unsigned char Num)
 {
 	unsigned char dataNum = 0;
-	while(Data[dataNum] != 0){
+	if(Data == NULL)
+		return 1;
+	while(dataNum < Num){
 		if(dataNum < 6){
 			OledWriteWordByHex(1, dataNum * 16, Data[dataNum]);
 		}
 		else if(dataNum < 12)
 			OledWriteWordByHex(3, (dataNum - 6) * 16, Data[dataNum]);
 		else 
-			return;
+			return 1;
 		++dataNum;
 	}
+	return 0;
 	
 }
 
@@ -341,11 +386,15 @@ void OledWriteMessageByHex(unsigned char *Data)
 		Col : 最好6的倍数 
 */
 
-void OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data)
+char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data)
 {
 	unsigned char i = 0;
 	unsigned char left = (Data >> 4);
 	unsigned char right = (Data & 0x0f);
+
+	if(Page > 4 || Col > MAX_COLUMN)
+		return 1;
+	
 	SetStartPage(Page);					//SetPageAddress(page); 
     SetStartColumn(Col);
 	if(left >=0 && left <= 9){
@@ -358,7 +407,7 @@ void OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char D
 			WR1BData(Fonts[('A' - 32 + left - 10) * 5 + i]);
 		}
 	}
-	else return;
+	else return 0;
 		
 	WR1BData(0x00);
 	
@@ -375,8 +424,9 @@ void OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char D
 			WR1BData(Fonts[('A' - 32 + right - 10) * 5 + i]);
 		}
 	}
-	else return;
+	else return 0;
 	WR1BData(0x03);	
+	return 0;
 }
 
 
@@ -384,12 +434,15 @@ void OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char D
 	功能 : 使用5*7字模  输出HEX码的数据，最多输出64个数字，即32个字符
 	输入 : 数组数据
 */
-void OledWriteMessageByHex57(unsigned char *str)
+char OledWriteBufByHex57(unsigned char *str, unsigned char Num)
 {
 	unsigned char charNum = 0;
 	unsigned char i = 0;
-	clearPageCol(0, 0);
-	while(*str){
+	//clearPageCol(0, 0);
+
+	if(str == NULL)	return 1;
+	
+	while(charNum < Num){
 		if(charNum < 8){			//第一排字
 			OledWriteWordByHex57(1, charNum * 12, *str);
         }
@@ -406,11 +459,13 @@ void OledWriteMessageByHex57(unsigned char *str)
 
 		}
 		else
-			return;
+			return 1;
 		str++;
 		charNum++;
 	}
-	
+
+	return 0;
+	/*
 	while(1){
 			
 			if(charNum < 8){			//第一排字
@@ -436,6 +491,7 @@ void OledWriteMessageByHex57(unsigned char *str)
 				break;
 			charNum++;
 			}
+	*/
 }
 
 /*
@@ -445,16 +501,69 @@ void OledWriteMessageByHex57(unsigned char *str)
 		Col : 最好6的倍数 
 		Data : 字母
 */
-void OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data)
+char OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data)
 {
 		unsigned char i = 0;
+		
+		if(Page > 4 || Col > MAX_COLUMN)
+			return 1;
+
+		if(Data < 32){
+			Data = 127;
+			SetStartPage(Page);					//SetPageAddress(page); 
+    		SetStartColumn(Col);
+			for(i = 0; i < 5; i++){
+				WR1BData(Fonts[(Data - 32) * 5 + i]);
+			}
+			WR1BData(0x00);	
+			return 1;
+		}
+		
 		SetStartPage(Page);					//SetPageAddress(page); 
     	SetStartColumn(Col);
 		for(i = 0; i < 5; i++){
 			WR1BData(Fonts[(Data - 32) * 5 + i]);
 		}
 		WR1BData(0x00);	
+
+		return 0;
 }
+
+/*
+	功能 : 用于state 使用5*7字模 输出一个字符的assic码	
+	输入 : Page 和 Col 显示的位置
+		Page : 
+		Col : 最好6的倍数 
+		Data : 字母
+*/
+char OledAssicForState(unsigned char Page, unsigned char Col,unsigned char Data)
+{
+		unsigned char i = 0;
+		
+		if(Page > 4 || Col > MAX_COLUMN)
+			return 1;
+		if(Data < 32){
+			Data = 127;
+			SetStartPage(Page);					//SetPageAddress(page); 
+    		SetStartColumn(Col);
+			for(i = 0; i < 5; i++){
+				WR1BData(Fonts[(Data - 32) * 5 + i] << 1);
+			}
+			WR1BData(0x00);	
+			return 1;
+		}
+		
+		SetStartPage(Page);					//SetPageAddress(page); 
+    	SetStartColumn(Col);
+		for(i = 0; i < 5; i++){
+			WR1BData(Fonts[(Data - 32) * 5 + i] << 1);
+		}
+		WR1BData(0x00);
+
+		return 0;
+}
+
+
 
 /*
 	功能 : 使用5*7字模 输出ASSIC码的数据，最多输出64个字符
@@ -465,7 +574,6 @@ void OledWriteMessage57(char *str)
 	unsigned char charNum = 0;
 	unsigned char i = 0;
 	unsigned char page = 0;
-	clearPageCol(0, 0);
 	
 	while(*str){
 
@@ -489,7 +597,7 @@ void OledWriteMessage57(char *str)
 		str++;
 		charNum++;
 	}
-	
+	/*
 	while(1){
 
 		if(charNum < 16){			//第一排字
@@ -511,18 +619,23 @@ void OledWriteMessage57(char *str)
 			break;
 		charNum++;
 		}
+		*/
 }
 
 /*
 	功能 : 清除某行某列开始的值
 	输入 : Page 和 Col 的位置
 */
-void clearPageCol(unsigned char Page, unsigned char Col)
+char clearPageCol(unsigned char Page, unsigned char Col)
 {
 	unsigned char i = Col;
+
+	if(Page > 4 || Col > MAX_COLUMN)
+		return 1;
 	SetStartPage(Page);					//SetPageAddress(page); 
     SetStartColumn(Col);
 	for(; i < MAX_COLUMN; i++){
 		WR1BData(0);
 	}
+	return 0;
 }

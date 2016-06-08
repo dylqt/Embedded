@@ -12,7 +12,7 @@ void ble_init()
 
 	BT_OPEN;
 	WEEK_UP_BT;
-	TRAN_MODE_BLE_IN;	
+	BLE_TRAN_MODE_IN;	
 }
 
 
@@ -30,7 +30,7 @@ void ble_init()
 // 05：57600 bps
 // 06：115200 bps
 // --------------------------------------------------
-signed char set_baud( unsigned char id )
+signed char ble_set_baud( unsigned char id )
 {
 	int i = 0;
 	clear_uart2_data();
@@ -51,10 +51,16 @@ signed char set_baud( unsigned char id )
 	for(; i  < uart2_rec_cnt; i++){
 		 SendData2( uart2_rec_data[i] );
 	}
-	if( uart2_rec_data[2] == 0x01 )
+	if( uart2_rec_data[2] == 0x01 ){
+		OledWriteWordByHex(3, 0, uart2_rec_cnt);
+		OledWriteMessage57("BLE set baud Success");
 		return 1;	// success
-	else 
-		return -1; 	
+	}
+	else {
+		OledWriteWordByHex(3, 0, uart2_rec_cnt);
+		OledWriteMessage57("BLE set baud False");
+		return -1;
+	}
 }
 
 
@@ -62,7 +68,7 @@ signed char set_baud( unsigned char id )
 // 成功 返回 id
 // 失败 返回 -1
 // ---------------------------------------------
-signed char inquire_baud(void)
+signed char ble_inquire_baud(void)
 {
 	clear_uart2_data();
 	// inquire
@@ -71,15 +77,28 @@ signed char inquire_baud(void)
     SendData2( 0x02 );
     SendData2( 0x00 );
 
-	Delay20ms();
+	Delay50ms();
 
    	// check
-	if( uart2_rec_cnt != 5 )
+
+	if( uart2_rec_cnt != 5 ){
+		//OledClear();
+		OledWriteWordByHex(3, 0, uart2_rec_cnt);
+		OledWriteMessage57("BLE baud read False1");
 		return -1;
-	if( uart2_rec_data[3] == 0x01 )
+	}
+	
+	if( uart2_rec_data[3] == 0x01 ){
+		//OledClear();
+		OledWriteMessage57("BLE baud read Success");
+		while(1);
 		return uart2_rec_data[4];	// success
-	else 
+	}
+	else{
+		//OledClear();
+		OledWriteMessage57("BLE baud read False2");
 		return -1; 
+	}
 }
 
 // ----------------- 发送数传 --------------

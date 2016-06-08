@@ -69,12 +69,20 @@ void WR1BData(unsigned char dat);
 void WRByte(unsigned char dat,unsigned char bIsCmd);
 void uDelay(unsigned char t);
 
-void OledFlush(unsigned char *);		//此版本为line mode
+char OledFlush(unsigned char *);		//此版本为line mode
 void OledClear();
 
-void SetStartPage(uint8_t page);	 //页模式下,设置起始页
-void SetStartColumn(uint8_t ColumnAddress);   //页模式下,设置起始列
+char SetStartPage(uint8_t page);	 //页模式下,设置起始页
+char SetStartColumn(uint8_t ColumnAddress);   //页模式下,设置起始列
 void OledWriteMessage(char *str);		//调试使用，显示ASSIC码，特殊符号都是空格
+
+
+/*
+	功能 : 刷新某一行
+	输入 : 某一行开始位置，和数据
+*/
+char OledFlushPage(unsigned char Page, unsigned char Col,unsigned char *buf, unsigned char bufNum);
+
 
 /*
 	功能 : 输出一个字符的HEX码
@@ -82,13 +90,15 @@ void OledWriteMessage(char *str);		//调试使用，显示ASSIC码，特殊符号都是空格
 		Page : 1 或 3 ; 总共5行，从0开始， 第一行只有7位，一个字符需要2个page，所以为1和3page开始
 		Col : 最好8的倍数 因为每个字符需要两位16列
 */
-void OledWriteWordByHex(unsigned char Page, unsigned char Col, unsigned char Data);
+char OledWriteWordByHex(unsigned char Page, unsigned char Col, unsigned char Data);
 
 /*
 	功能 : 输出HEX码的数据，最多输出24个数字，即12个字符
-	输入 : 数组数据
+	输入 : 数组数据，以及数组的长度
+	输出 : 当数组超过12个字符时，显示12个字符，并返回错误代码
 */
-void OledWriteMessageByHex(unsigned char * Data);
+char OledWriteBufByHex(unsigned char *Data, unsigned char Num);
+
 
 
 // -------------------------- 使用5*7字模-------------------------------------------
@@ -99,13 +109,14 @@ void OledWriteMessageByHex(unsigned char * Data);
 		Col : 最好6的倍数 
 */
 
-void OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data);
+char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data);
 
 /*
-	功能 : 输出HEX码的数据，最多输出64个数字，即32个字符
+	功能 : 使用5*7字模  输出HEX码的数据，最多输出64个数字，即32个字符
 	输入 : 数组数据
 */
-void OledWriteMessageByHex57(unsigned char *str);
+char OledWriteBufByHex57(unsigned char *str, unsigned char Num);
+
 
 
 /*
@@ -114,7 +125,18 @@ void OledWriteMessageByHex57(unsigned char *str);
 		Page : 
 		Col : 最好6的倍数 
 */
-void OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data);
+char OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data);
+
+/*
+	功能 : 用于state 使用5*7字模 输出一个字符的assic码	
+	输入 : Page 和 Col 显示的位置
+		Page : 
+		Col : 最好6的倍数 
+		Data : 字母
+*/
+char OledAssicForState(unsigned char Page, unsigned char Col,unsigned char Data);
+
+
 
 /*
 	功能 : 使用5*7字模 输出ASSIC码的数据，最多输出80个字符
@@ -127,6 +149,6 @@ void OledWriteMessage57(char *str);
 	功能 : 清除某行某列开始的值
 	输入 : Page 和 Col 的位置
 */
-void clearPageCol(unsigned char Page, unsigned char Col);
+char clearPageCol(unsigned char Page, unsigned char Col);
 
 #endif

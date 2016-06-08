@@ -26,7 +26,7 @@ int main()
 	beep200msBZ();	// 上电提醒
 
 	UartInit();		// Uart1 (for indy)	//115200bps@22.1184MHz
-	Uart2Init();	// Uart2 (for BT)		//115200bps@22.1184MHz
+	Uart2Init();	// Uart2 (for BT)		// 9600bps@22.1184MHz
 	Uart3Init(); 	//	115200bps@22.1184MHz
 	Uart4Init();	// Uart4 (for debug) //115200bps@22.1184MHz
 	
@@ -37,29 +37,39 @@ int main()
 	OledPowerUp();		// 开启OLED
 
 	ble_init();	// 默认透传模式
+	BLE_CMD_MODE_IN;
 	
 	//t0IntInit();	// t0初始化
 
-
-	OledFlush((unsigned char *)HM);
-	//OledWriteMessage57("ABCDEabcdefghijklmnopqrstuvwxyz BT TEST 0123456498751321");
-
-	//OledWriteWordByHex57(3,0,'s');
-	//OledOledWriteMessageByHex57("hello world\n");
+	//Delay999ms();
+	// OledFlush((unsigned char *)HM);
+	OledFlushBaseState();
+	OledBatteryPower(97);
+	OledBatteryState(3);
+	OledBtConnectState(1);
+	OledChargingState(1);
+//	OledWriteWordByHex(1,0,sizeof(buf));
 	//OledWeakUpDownMode(9);	// 启动睡眠模式
-	/*
-	while(1){
-		Delay200ms();
-		SendData(0xff);
-		Delay200ms();
-		SendData(0x00);
-		i = 0;
-		while(rec_num){
-			SendData(rec_data[i]);
-			i++;
-			rec_num--;
-		}
-	}*/
+	
+//	while(1){	
+//		Delay999ms();
+		//ble_inquire_baud();
+//		ble_set_baud(2);
+		//SendString("hello \n ");
+		//SendString4("hello \n");
+//		i = 0;
+//		j = 0;
+//		while(rec_num){
+//			SendData(rec_data[i]);			
+//			i++;
+//			rec_num--;
+//		}
+//		while(uart4_rec_cnt){
+//			SendData4(uart4_rec_data[j]);
+//			j++;
+//			uart4_rec_cnt--;
+//		}
+//	}
 	
 	/*
 	while(1)
@@ -90,96 +100,107 @@ int main()
 	
 	// ------------------- indy ----------------------------------
   //  WDT_CONTR |= 0X37;//使能看门狗。128分频，喂狗时间大约2.6S.
+//	
+//	clear_uart2_data();
+//	clear_uart2_mes();
+//	clear_rec_data();
+//	OledClear();
+//	 //阅读器参数预设。预设过程中关闭串口2中断。预设完成后再打开。
+//	index_send(1);
+//	
+//	Delay20ms();
+// 
+//	if(index_r_check(1) == 0)
+//	{
+//		OledWriteMessage57("connect OK ");
+//	}
+//	else
+//		OledWriteMessage57("connect error ");
 
-	clear_uart2_data();
-	clear_uart2_mes();
-	clear_rec_data();
-	OledClear();
-	 //阅读器参数预设。预设过程中关闭串口2中断。预设完成后再打开。
-	index_send(1);
+//	Delay999ms();
+//	for(i = 1;i <= 33;i++)
+//	{
+//        clear_rec_data();
+//        index_send(i);
+//        Delay20ms();    
+//    }
+//	
+//	while(1)
+//		{	
+//		 	// Delay100ms();
+//			//keyScanResult = keyScan();
+//			
+//	    // clear_uart2_mes();
+//	    	Delay999ms();
+//			keyScanResult = S3_KEYM;
+//	    	OledClear();
+//	    	clear_rec_data();  
+//			for(send_times=0;send_times<5;send_times++)
+//			{
+//				
+//	            switch(keyScanResult)
+//	            {
+//	                case S1_TUCH:  
+//	                    rec_flag=0;
+//	                    indy_readtemp();	//temp
+//	                    break;
+
+//	                case S2_KEYP: 
+//	                    rec_flag=0;
+//	                    indy_read_sensorcode();	//sensor code
+//	                    break;
+
+//	                case S3_KEYM: 
+//	                    rec_flag=0;
+//	                    indy_readrssi();	//rssi
+//	                    break;
+
+//	               default:
+//	                    break;
+//	            }  
+//	            //beep = 0;
+//			}
+//			/*
+//			if(rec_num > 0){
+//				Delay999ms();
+//	      		OledWriteMessageByHex57(rec_data, rec_num);
+//				beep200msBZ();
+//			}
+//			else
+//				OledWriteMessage57("NO MESSAGE");
+//				*/
+//		
+//	        if(keyScanResult)
+//	        {
+//	            
+//	            if(rec_flag_cnt > 0)
+//	            {
+//	                rec_flag   = 1;
+//	                rec_flag_cnt = 0;
+//	            }
+//	 
+//	            if(rec_flag)
+//	    	    {
+
+//	                //SendData2(0xee);
+//	                uart2_sendMes();
+//	              //  clear_uart2_data();
+//	              //  clear_uart2_mes();
+//	            }
+//	            else
+//	            {
+//	                fail_cnt++;
+//	                if(fail_cnt >= 30)
+//	                    return 0;
+//	                uart2_body.cmd_type = 0;
+//	                //SendData2(0xcc);
+//	                uart2_sendMes();
+//	             //   clear_uart2_data();
+//	             //   clear_uart2_mes();
+//	            } 
+//	        }
+//	    }
 	
-	Delay20ms();
- 
-	if(index_r_check(1) == 0)
-	{
-		OledWriteMessage57("connect OK ");
-	}
-	else
-		OledWriteMessage57("connect error ");
-	
-	for(i = 1;i <= 33;i++)
-	{
-        clear_rec_data();
-        index_send(i);
-        Delay20ms();    
-    }
-	
-	while(1)
-		{	
-		 	Delay100ms();
-			keyScanResult = keyScan();
-			
-	    	clear_uart2_mes();
-			
-	    	OledWriteMessageByHex57(rec_data);
-	      
-			for(send_times=0;send_times<5;send_times++)
-			{
-				clear_rec_data();
-	            switch(keyScanResult)
-	            {
-	                case S1_TUCH:  
-	                    rec_flag=0;
-	                    indy_readtemp();	//temp
-	                    break;
-
-	                case S2_KEYP: 
-	                    rec_flag=0;
-	                    indy_read_sensorcode();	//sensor code
-	                    break;
-
-	                case S3_KEYM: 
-	                    rec_flag=0;
-	                    indy_readrssi();	//rssi
-	                    break;
-
-	               default:
-	                    break;
-	            }  
-	            //beep = 0;
-			}
-	        
-	        if(keyScanResult)
-	        {
-	            
-	            if(rec_flag_cnt > 0)
-	            {
-	                rec_flag   = 1;
-	                rec_flag_cnt = 0;
-	            }
-	 
-	            if(rec_flag)
-	    	    {
-
-	                //SendData2(0xee);
-	                uart2_sendMes();
-	              //  clear_uart2_data();
-	              //  clear_uart2_mes();
-	            }
-	            else
-	            {
-	                fail_cnt++;
-	                if(fail_cnt >= 30)
-	                    return 0;
-	                uart2_body.cmd_type = 0;
-	                //SendData2(0xcc);
-	                uart2_sendMes();
-	             //   clear_uart2_data();
-	             //   clear_uart2_mes();
-	            } 
-	        }
-        
-		}
 
 	
 	// ----------------------- 按键 -----------------------------
@@ -307,9 +328,13 @@ int main()
 //		}
 	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^								
 	
-	
+	// --------------------- 业务 ---------------------------------
+	while(1){
+		Delay100ms(); 	// 100ms 处理一次事件
 
-//	}
+		
+
+	}
 		
 	
 	

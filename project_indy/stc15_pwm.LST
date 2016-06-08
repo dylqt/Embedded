@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/03/2016 08:56:23 PAGE 1   
+C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/08/2016 09:44:05 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE STC15_PWM
@@ -62,7 +62,7 @@ line level    source
   52   1          CCAPM1 = 0x42;                  //PCA模块1为7位PWM模式
   53   1      
   54   1          PCA_PWM2 = 0x80;                //PCA模块2工作于6位PWM
-C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/03/2016 08:56:23 PAGE 2   
+C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/08/2016 09:44:05 PAGE 2   
 
   55   1          CCAP2H = CCAP2L = 0x20;         //PWM2的占空比为50% ((40H-20H)/40H)
   56   1          CCAPM2 = 0x42;                  //PCA模块2为6位PWM模式
@@ -126,7 +126,7 @@ line level    source
  114   1        PWMC = CYCLE;                   //设置PWM周期     
  115   1        PWM5T1 = 0x0000;        //设置PWM5第1次反转的PWM计数
  116   1        PWM5T2 = CYCLE * DUTY / 100;    //设置PWM5第2次反转的PWM计数
-C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/03/2016 08:56:23 PAGE 3   
+C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/08/2016 09:44:05 PAGE 3   
 
  117   1                        //占空比为(PWM2T2-PWM2T1)/PWMC
  118   1        PWM5CR = 0x08;                  //选择PWM5输出到P4.2,不使能PWM5中断
@@ -190,7 +190,7 @@ line level    source
  176          {
  177   1        float cycle = 0;
  178   1        switch(FRE){    //cycle / FRE = 1 / FOSC ;cycle 最大为32767
-C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/03/2016 08:56:23 PAGE 4   
+C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/08/2016 09:44:05 PAGE 4   
 
  179   2          case 0:     // 300HZ
  180   2            cycle = 18432;
@@ -254,7 +254,7 @@ line level    source
  238   1          PWM4CR = 0x00;                  //选择PWM4输出到P2.2,不使能PWM中断
  239   1        
  240   1        PWMCR |= 0x04;          //使能PWM4信号输出
-C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/03/2016 08:56:23 PAGE 5   
+C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/08/2016 09:44:05 PAGE 5   
 
  241   1          PWMCR |= 0x80;                  //使能PWM模块
  242   1          PIN_SW2 &= ~0x80;
@@ -318,7 +318,7 @@ line level    source
  300   2            else 
  301   2              break;
  302   2          case 50 :
-C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/03/2016 08:56:23 PAGE 6   
+C51 COMPILER V9.52.0.0   STC15_PWM                                                         06/08/2016 09:44:05 PAGE 6   
 
  303   2            if(way == 1){
  304   3              OLED_BRT_DUTY = 90;

@@ -15,41 +15,6 @@ void t0int() interrupt 1            //中断入口
 	temp_t0_int_cnt++;
 	vcc_t0_int_cnt++;
 	
-	SendData((unsigned char)temp_t0_int_cnt);
-	
-//	if(result.battery_pct > batTmp)
-//		result.battery_pct = batTmp;		// 取最大的电池电量
-//	if(result.temp_power_chip > tempTmp)	
-//		result.temp_power_chip = batTmp;	// 取最高的温度
-	
-	if(temp_t0_int_cnt >= 250)		// 基数20ms * 250 = 5s	更新温度
-	{
-//			SendData4(0xff);
-//		SendString4("temp of  u14 =  X  deg \n ");
-		result.temp_power_chip = tempScan();
-		OledWriteAssic57(3, 0, (unsigned char)result.temp_power_chip / 10 + '0');
-		OledWriteAssic57(3, 6, ((unsigned char)result.temp_power_chip % 10) + '0');
-		OledWriteAssic57(3, 12, '.');
-		OledWriteAssic57(3, 18, ((unsigned int)(result.temp_power_chip * 100) % 100) / 10 + '0');
-		OledWriteAssic57(3, 24, (unsigned int)(result.temp_power_chip * 100) % 10 + '0');
-
-		// 清零
-		result.temp_power_chip = 0;
-		
-		temp_t0_int_cnt = 0;
-	}
-	if(vcc_t0_int_cnt >= 3000 )		// 基数20ms * 3000 = 60000ms; 1min	更新电量
-	{
-		result.battery_pct = getBatteryPercent();
-		//SendString4("temp of  u14 =  X  deg \n ");
-		OledWriteAssic57(4, 0, result.battery_pct / 10 + '0');
-		OledWriteAssic57(4, 6, result.battery_pct % 10 + '0');
-
-		//清零
-		result.battery_pct = 0;
-		
-		vcc_t0_int_cnt = 0;
-	}
 	
 }
 
@@ -69,7 +34,37 @@ void t0IntInit(void)
     EA = 1;
 }
 
+void freshStateLine()
+{
+	
+	if(temp_t0_int_cnt >= 250)		// 基数20ms * 250 = 5s	更新温度
+	{
+//		SendString4("temp of  u14 =  X  deg \n ");
+		result.temp_power_chip = tempScan();
+//		OledWriteAssic57(3, 0, (unsigned char)result.temp_power_chip / 10 + '0');
+//		OledWriteAssic57(3, 6, ((unsigned char)result.temp_power_chip % 10) + '0');
+//		OledWriteAssic57(3, 12, '.');
+//		OledWriteAssic57(3, 18, ((unsigned int)(result.temp_power_chip * 100) % 100) / 10 + '0');
+//		OledWriteAssic57(3, 24, (unsigned int)(result.temp_power_chip * 100) % 10 + '0');
 
+		// 清零
+		result.temp_power_chip = 0;
+		
+		temp_t0_int_cnt = 0;
+	}
+	if(vcc_t0_int_cnt >= 3000 )		// 基数20ms * 3000 = 60000ms; 1min	更新电量
+	{
+		result.battery_pct = getBatteryPercent();
+		
+//		OledWriteAssic57(4, 0, result.battery_pct / 10 + '0');
+//		OledWriteAssic57(4, 6, result.battery_pct % 10 + '0');
+
+		//清零
+		result.battery_pct = 0;
+		
+		vcc_t0_int_cnt = 0;
+	}
+}
 
 
 

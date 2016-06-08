@@ -20,7 +20,7 @@ void batteryInit(void)
 	 VSEL = 1;
 	 BYP = 1;
 	 
-	 PG = 1;
+	 PG = 1;	// 电源模块状态标志
 	 
 	 //SendString4("Sys = 0 \n ");
 	//Delay999ms();

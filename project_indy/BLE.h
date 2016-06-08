@@ -4,6 +4,7 @@
 #include "stc15_uart.h"
 #include "delay.h"
 #include "iap15.h"
+#include "stc15_oled.h"
 
 sbit BUSY_BLE = P6^4;		//	数据拥塞指示(透传模式下才有意义，命令模式下无意义)
 							// 高电平：指示MCU 可以继续向模块写入不超过200 字节的数据
@@ -14,12 +15,12 @@ sbit BRT_BLE = P6^7;		//休眠控制引脚(不可悬空) 置低：唤醒模块 置高：允许模块进入
 
 #define BT_OPEN (BT_CTL_BLE = 0)	// 置低：开始蓝牙广播
 #define BT_CLOSE (BT_CTL_BLE = 1)	// 置高：关闭蓝牙功能
-#define CMD_MODE_BLE_IN (MODE_CTL_BLE = 0) 	// 置低：进入命令模式
-#define TRAN_MODE_BLE_IN (MODE_CTL_BLE = 1) // 置高：进入透传模式
+#define BLE_CMD_MODE_IN (MODE_CTL_BLE = 0) 	// 置低：进入命令模式
+#define BLE_TRAN_MODE_IN (MODE_CTL_BLE = 1) // 置高：进入透传模式
 #define WEEK_UP_BT (BRT_BLE = 0)	//置低：唤醒模块
 #define SLEEP_BT (BRT_BLE = 1)		//置高：允许模块进入休眠状态
 
 void ble_init();
-signed char set_baud(unsigned char id);
-signed char inquire_baud(void);
+signed char ble_set_baud(unsigned char id);
+signed char ble_inquire_baud(void);
 #endif
