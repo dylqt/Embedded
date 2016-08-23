@@ -13,7 +13,7 @@ void GetPwm();
 	DUTY : 占空比
 	10 : 10%
 */
-void GetPwm4(unsigned char DUTY);
+void GetPwm4(unsigned int fre);
 
 /*
 功能: P4.2输出PWM波
@@ -50,7 +50,13 @@ void GetPwmBZ(unsigned char FRE, unsigned int DUTY);
 
 #define BzOFF (PWMCR &= ~0x20)					//关闭使能PWM7信号输出
 
-
+/*
+功能: P2^1 PWM3输出PWM波	100HZ
+输入:
+	DUTY : 占空比
+	10 : 10%
+*/
+void GetPwmBRT(unsigned char DUTY);
 /*
 功能: 调节亮度 增加或减少
 输入:

@@ -8,7 +8,7 @@ uint16 rec_num = 0;
 xdata   uint8   uart2_rec_data[201];
 uint8   uart2_rec_cnt = 0;
 
-xdata   uint8   uart3_rec_data[20];
+xdata   uint8   uart3_rec_data[200];
 uint8   uart3_rec_cnt = 0;
 
 xdata   uint8   uart4_rec_data[200];
@@ -22,14 +22,14 @@ void UartInit(void)
 	P3M1 &= ~0xC0; 
 	P3M0 |= 0xC0;
 
-	ACC = P_SW1;
-  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
-	P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
-
 //	ACC = P_SW1;
-//    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
-//    ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
-//    P_SW1 = ACC;  
+//  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
+//	P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
+
+	ACC = P_SW1;
+    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
+    ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
+    P_SW1 = ACC;  
   
 //  ACC = P_SW1;
 //  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=1
@@ -177,7 +177,7 @@ void SendString2(char *s)
 void Uart2Init()	//9600bps@22.1184MHz
 {
 	P1M1 &= ~0x03;
-	P1M0 |= 0x03;
+	P1M0 &= ~0x03;
 	
     P_SW2 &= ~S2_S0;            //S2_S0=0 (P1.0/RxD2, P1.1/TxD2)
 //  P_SW2 |= S2_S0;             //S2_S0=1 (P4.6/RxD2_2, P4.7/TxD2_2)
@@ -189,16 +189,17 @@ void Uart2Init()	//9600bps@22.1184MHz
 	T2H = 0xFD;		//设定定时初值
 	AUXR |= 0x10;		//启动定时器2
 
-    IE2 = 0x01;                 //使能串口2中断
-    EA = 1;
+  IE2 = 0x01;                 //使能串口2中断
+  EA = 1;
 }
 
 
 void clear_rec_data()	  //清空接收数据
 {
-	uint16 i;
-	for(i=0;i<500;i++)
-	 	  rec_data[i] = 0;
+//	uint16 i;
+	//for(i=0;i<500;i++)
+	// 	  rec_data[i] = 0;
+	memset(rec_data, 0, sizeof(rec_data));
 	rec_num = 0;
 }
 
@@ -213,12 +214,21 @@ void clear_uart2_data()
     uart2_rec_cnt = 0 ;
 }
 
+void clear_uart3_data()
+{
+	memset(uart3_rec_data, 0x00, sizeof(uart3_rec_data));
+	uart3_rec_cnt = 0;
+}
 /////////////////////////////////////////////////////////////
 // Uart3
-void Uart3Init()	//115200bps@22.1184MHz
+void Uart3Init()	//9600bps@22.1184MHz
 {
+
+	P5M1 &= ~0x03;
+	P5M0 &= ~0x03;
+	
 	//P_SW2 &= ~S3_S0; 		   //S3_S0=0 (P0.0/RxD3, P0.1/TxD3)
-		P_SW2 |= S3_S0; 			//S3_S0=1 (P5.0/RxD3_2, P5.1/TxD3_2)
+	P_SW2 |= S3_S0; 			//S3_S0=1 (P5.0/RxD3_2, P5.1/TxD3_2)
 	
 //#if (PARITYBIT3 == NONE_PARITY3)
 //		S3CON = 0x50;				//8位可变波特率
@@ -231,8 +241,8 @@ void Uart3Init()	//115200bps@22.1184MHz
 	S3CON = 0x10;		//8位数据,可变波特率
 	S3CON |= 0x40;		//串口3选择定时器3为波特率发生器
 	T4T3M |= 0x02;		//定时器3时钟为Fosc,即1T
-	T3L = 0xD0;		//设定定时初值
-	T3H = 0xFF;		//设定定时初值
+	T3L = 0xC0;		//设定定时初值
+	T3H = 0xFD;		//设定定时初值
 	T4T3M |= 0x08;		//启动定时器3
 
 	IE2 |= 0x08; 				//使能串口3中断
@@ -250,7 +260,8 @@ void Uart3() interrupt 17 using 1
     if (S3CON & S3RI)
     {
         S3CON &= ~S3RI;         //清除S3RI位
-        P0 = S3BUF;             //P0显示串口数据
+        uart3_rec_data[uart3_rec_cnt++] = S3BUF;             //P0显示串口数据
+        // SendData4(uart3_rec_data[S3BUF]);
        // P2 = (S3CON & S3RB8);   //P2.2显示校验位
     }
     if (S3CON & S3TI)
@@ -384,4 +395,16 @@ void SendString4(char *s)
 #endif
 }
 
+/*----------------------------
+发送字符数组
+----------------------------*/
+
+void SendBuf4(char *uart3_rec_data, unsigned char uart3_rec_cnt)
+{
+	int i = 0; 
+	for(; i < uart3_rec_cnt; i++){
+		SendData4(uart3_rec_data[i]);
+	}
+	return;
+}
 

@@ -43,11 +43,14 @@ void AdcIntInit(unsigned char ch)
 	EA = 1;
 }
 
-
-
+unsigned char getKeyAdc()
+{
+	// 读取p1.1端口
+	return read_adc256(1);
+}
 /*----------------------------
-ADC中断服务程序
-// 进入中断以后关闭中断，使用查询模式进行
+	ADC中断服务程序
+	// 进入中断以后关闭中断，使用查询模式进行
 ----------------------------*/
 void adc_isr_key() interrupt 5 using 1
 {

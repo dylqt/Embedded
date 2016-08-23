@@ -3,7 +3,7 @@
 
 void click10msBZ()
 {	
-	GetPwmBZ(0, 60);			//发声
+	GetPwmBZ(1, 60);			//发声
 	
 	Delay10ms();
 	
@@ -19,6 +19,17 @@ void beep200msBZ()
 	GetPwmBZ(3, 60);			//发声
 
 	Delay200ms();
+	
+	PWMCR &= ~0x20;			//关闭PWM7信号输出
+	P06 = 0;				//pin3 工作完 及  开机 时  为 强输出低。
+}
+
+void beep100msBZ()
+{
+	
+	GetPwmBZ(3, 60);			//发声
+
+	Delay100ms();
 	
 	PWMCR &= ~0x20;			//关闭PWM7信号输出
 	P06 = 0;				//pin3 工作完 及  开机 时  为 强输出低。

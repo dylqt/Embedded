@@ -35,8 +35,11 @@
 
 /*
 掉电唤醒计时器
-输入 time : 
-	488.28us * time	
+输入 time : 最大为2^15 = 32768
+	[WIRC_H, WIRC_L] = ff00 = 65280
+	一次时间 : ( 10^6 / [WIRC_H, WIRC_L] ) * 16 = 245 us
+	唤醒时间 : 245us * time
+	最大时间 : 245 * 32768 = 8s
 */
 void WeakUpDownMode(unsigned int time);
 

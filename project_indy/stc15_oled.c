@@ -8,9 +8,10 @@ void InitOled()
 	//	6.4  R/W#	读写选择 或 写	  配置 强输出。
 	P2M1 = 0x00;
 	P2M0 = 0xff;	
-	
-	BS1_OLED = 0; 
-	BS2_OLED = 0;	//BS1 BS2  配置 强输出 ；都拉高 ；选择 80xx 总线。  00 选择spi
+
+// 硬件置低	
+//	BS1_OLED = 0; 
+//	BS2_OLED = 0;	//BS1 BS2  配置 强输出 ；都拉高 ；选择 80xx 总线。  00 选择spi
 	
 	//6.5  D0~D7	数据总线   写  配置 强输出；读配置 输入带上拉电阻。
 	//P7M1 &= ~0x80;	// D0 P7.7
@@ -80,8 +81,15 @@ void WR1BCmd(unsigned char cmd)
 void OledPowerUp(void)
 {	
 	int i = 0;
-	int a = 0;
-	 for(;i < 30000;i++);	 //延时保证可靠显示 	  
+	RES_OLED = 0;
+	
+	 for(;i < 30000;i++);	 //延时保证可靠显示 	
+	VDDB_OLED = 1;
+	Delay100ms();
+	RES_OLED = 1;
+	Delay3us();
+	Delay3us();
+	
 	 WR1BCmd(0xae);		//0xAE 关闭显示		 
 	 //SetMemoryAddressMode(2); 		 //0x20(0x02默认),地址自增模式,页模式下PAGE会自动归0,ModeSelect://0, Horizontal Addressing Mode ;//1, Vertical Addressing Mode; //2,Page Addressing Mode (default)
 	 //SetPageAddressRange(0);
@@ -107,7 +115,7 @@ void OledPowerUp(void)
 
 	
 	//flush((unsigned char *)HM);//清屏
-	OledClear();
+	//OledClear();
 	
 }
 
@@ -407,7 +415,7 @@ char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char D
 			WR1BData(Fonts[('A' - 32 + left - 10) * 5 + i]);
 		}
 	}
-	else return 0;
+	else return 1;
 		
 	WR1BData(0x00);
 	
@@ -424,7 +432,7 @@ char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char D
 			WR1BData(Fonts[('A' - 32 + right - 10) * 5 + i]);
 		}
 	}
-	else return 0;
+	else return 1;
 	WR1BData(0x03);	
 	return 0;
 }
@@ -434,15 +442,21 @@ char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char D
 	功能 : 使用5*7字模  输出HEX码的数据，最多输出64个数字，即32个字符
 	输入 : 数组数据
 */
-char OledWriteBufByHex57(unsigned char *str, unsigned char Num)
+
+char OledWriteBufByHex57index(unsigned char Page, unsigned char Col, unsigned char *str, unsigned char Num)
 {
 	unsigned char charNum = 0;
+	unsigned char writeNum = 0;
 	unsigned char i = 0;
 	//clearPageCol(0, 0);
-
-	if(str == NULL)	return 1;
 	
-	while(charNum < Num){
+	if(Page < 1 || Page > 4 || charNum > MAX_COLUMN || str == NULL){
+		OledAssicForState(0,0,127);
+		return 1;
+	}
+	charNum = (Page - 1) * 8 + ( (Col % 12 == 0) ? Col : ( (Col / 12 + 1) * 12) );	
+		
+	while(writeNum < Num){
 		if(charNum < 8){			//第一排字
 			OledWriteWordByHex57(1, charNum * 12, *str);
         }
@@ -462,37 +476,26 @@ char OledWriteBufByHex57(unsigned char *str, unsigned char Num)
 			return 1;
 		str++;
 		charNum++;
+		writeNum++;
+		
 	}
 
 	return 0;
-	/*
-	while(1){
-			
-			if(charNum < 8){			//第一排字
-				OledWriteAssic57(1, charNum * 6, ' ');
-				OledWriteAssic57(1, (charNum + 1) * 6, ' ');
-			}
-			else if(charNum < 16){
-				OledWriteAssic57(2, (charNum - 16) * 6, ' ');
-				OledWriteAssic57(2, (charNum - 16 + 1) * 6, ' ');
-	
-			}
-			else if(charNum < 24){
-				OledWriteAssic57(3, (charNum - 32) * 6, ' ');
-				OledWriteAssic57(3, (charNum - 32 + 1) * 6, ' ');
-	
-			}
-			else if(charNum < 32){
-				OledWriteAssic57(4, (charNum - 48) * 6, ' ');
-				OledWriteAssic57(4,(charNum - 48 + 1) * 6, ' ');
-	
-			}
-			else
-				break;
-			charNum++;
-			}
-	*/
 }
+
+char OledWriteBufByHex57(unsigned char *str, unsigned char Num)
+{
+	if(str == NULL){
+		OledAssicForState(0, 0, 127);
+		return 1;
+	}
+	OledWriteBufByHex57index(1, 0, str, Num);
+	return 0;
+}
+
+
+
+
 
 /*
 	功能 : 使用5*7字模 输出一个字符的assic码
@@ -508,7 +511,7 @@ char OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data)
 		if(Page > 4 || Col > MAX_COLUMN)
 			return 1;
 
-		if(Data < 32){
+		if(Data < 32  || Data > 127){
 			Data = 127;
 			SetStartPage(Page);					//SetPageAddress(page); 
     		SetStartColumn(Col);
@@ -542,7 +545,7 @@ char OledAssicForState(unsigned char Page, unsigned char Col,unsigned char Data)
 		
 		if(Page > 4 || Col > MAX_COLUMN)
 			return 1;
-		if(Data < 32){
+		if(Data < 32 || Data > 127){
 			Data = 127;
 			SetStartPage(Page);					//SetPageAddress(page); 
     		SetStartColumn(Col);
@@ -597,29 +600,6 @@ void OledWriteMessage57(char *str)
 		str++;
 		charNum++;
 	}
-	/*
-	while(1){
-
-		if(charNum < 16){			//第一排字
-			OledWriteAssic57(1, charNum * 6, ' ');
-        }
-        else if(charNum < 32){
-			OledWriteAssic57(2, (charNum - 16) * 6, ' ');
-
-		}
-		else if(charNum < 48){
-			OledWriteAssic57(3, (charNum - 32) * 6, ' ');
-
-		}
-		else if(charNum < 64){
-			OledWriteAssic57(4, (charNum - 48) * 6, ' ');
-
-		}
-		else
-			break;
-		charNum++;
-		}
-		*/
 }
 
 /*
@@ -639,3 +619,91 @@ char clearPageCol(unsigned char Page, unsigned char Col)
 	}
 	return 0;
 }
+
+/*
+	功能 : 使用5*7字模  输出assic的数据，最多输出64个数字，即32个字符
+	输入 : 起始页和起始位置，数组数据
+*/
+char OledWriteBufByAssic57(unsigned char Page, unsigned char Col, unsigned char *arr, unsigned char Num)
+{
+	unsigned char charNum = 0;
+	unsigned char writeNum = 0;
+	unsigned char i = 0;
+
+	if(Page < 1 || Page > 4 || charNum > MAX_COLUMN || arr == NULL){
+		OledAssicForState(0,0,127);
+		return 1;
+	}
+	charNum = (Page - 1) * 16 + ( (Col % 6 == 0) ? Col : ( (Col / 6 + 1) * 6) );
+	while(writeNum < Num){
+		if(charNum < 16){			//第一排字
+			OledWriteAssic57(1, charNum * 6, *arr);
+        }
+        else if(charNum < 32){
+			OledWriteAssic57(2, (charNum - 16) * 6, *arr);
+
+		}
+		else if(charNum < 48){
+			OledWriteAssic57(3, (charNum - 32) * 6, *arr);
+
+		}
+		else if(charNum < 64){
+			OledWriteAssic57(4, (charNum - 48) * 6, *arr);
+
+		}
+		else
+			break;
+		arr++;
+		charNum++;
+		writeNum++;
+	}
+	return 0;
+}
+
+
+unsigned char OledWriteDouble(unsigned char Page, unsigned char Col, double input)
+{
+	unsigned char inputLeft = (unsigned char)input;	// 小数点左边数值
+	unsigned char inputRight = (input - (double)inputLeft) * 100;	// 小数点右边数值	保留两位
+
+
+	unsigned char numArr[64] = {0};	// 用来保存数字，默认最大为64位
+	unsigned char i = 0;
+ 	unsigned char nb = 0;
+	unsigned char output = 0;
+	if(Page > 4 || Col > MAX_COLUMN)
+		return 1;
+
+	// 得到整数部分
+	numArr[63] = inputRight % 10 + '0';
+	numArr[62] = inputRight / 10 + '0';
+	numArr[61] = '.';
+	do{
+		numArr[60 - nb] = inputLeft % 10 + '0';
+		++nb;
+		inputLeft /= 10;
+	}while(inputLeft != 0);
+	
+	OledWriteBufByAssic57(Page, Col, numArr + 61 - nb, nb + 3);
+	return 0;
+	
+	
+}
+
+char OledWriteTempSymbol(unsigned char Page, unsigned char Col)
+{
+	int i = 0;
+	if(Page < 1 || Page > 4 || Col > 84){
+		OledAssicForState(0,0,127);
+		return 1;
+	}
+	
+	SetStartPage(Page);					//SetPageAddress(page); 
+    SetStartColumn(Col);
+	
+	for(; i < 16; i++){
+		WR1BData(tempSymbol[i]);
+	}
+	return 0;
+}
+

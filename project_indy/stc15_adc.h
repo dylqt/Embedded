@@ -29,6 +29,11 @@ void Delay(unsigned char n);
 */
 unsigned char read_adc256(unsigned char ch);
 
+// 按键扫描
+unsigned char getKeyAdc();
+
+
+
 /*
 功能 : 将adc采集到的数字量，通过基准值计算，得到模拟值大小、
 公式 : adc_result = 256 * (vin / vcc)

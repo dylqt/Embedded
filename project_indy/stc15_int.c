@@ -1,7 +1,6 @@
 #include "stc15_int.h"
 
-unsigned int temp_t0_int_cnt = 0;
-unsigned int vcc_t0_int_cnt = 0;
+
 
 //T0扩展为外部下降沿中断
 void t0int() interrupt 1            //中断入口
@@ -9,15 +8,12 @@ void t0int() interrupt 1            //中断入口
 	unsigned char batTmp = 0;
 	double tempTmp = 0;
 	
-//	batTmp = getBatteryPercent();
-//	tempTmp = tempScan();
-	
-	temp_t0_int_cnt++;
-	vcc_t0_int_cnt++;
-	
-	
+	workState.temp_t0_int_cnt++;
+	workState.vcc_t0_int_cnt++;
 }
 
+
+// 定时基数20ms
 void t0IntInit(void)
 {
    // AUXR |= 0x80;                    //定时器0为1T模式	// max 2.9ms 
@@ -34,37 +30,6 @@ void t0IntInit(void)
     EA = 1;
 }
 
-void freshStateLine()
-{
-	
-	if(temp_t0_int_cnt >= 250)		// 基数20ms * 250 = 5s	更新温度
-	{
-//		SendString4("temp of  u14 =  X  deg \n ");
-		result.temp_power_chip = tempScan();
-//		OledWriteAssic57(3, 0, (unsigned char)result.temp_power_chip / 10 + '0');
-//		OledWriteAssic57(3, 6, ((unsigned char)result.temp_power_chip % 10) + '0');
-//		OledWriteAssic57(3, 12, '.');
-//		OledWriteAssic57(3, 18, ((unsigned int)(result.temp_power_chip * 100) % 100) / 10 + '0');
-//		OledWriteAssic57(3, 24, (unsigned int)(result.temp_power_chip * 100) % 10 + '0');
-
-		// 清零
-		result.temp_power_chip = 0;
-		
-		temp_t0_int_cnt = 0;
-	}
-	if(vcc_t0_int_cnt >= 3000 )		// 基数20ms * 3000 = 60000ms; 1min	更新电量
-	{
-		result.battery_pct = getBatteryPercent();
-		
-//		OledWriteAssic57(4, 0, result.battery_pct / 10 + '0');
-//		OledWriteAssic57(4, 6, result.battery_pct % 10 + '0');
-
-		//清零
-		result.battery_pct = 0;
-		
-		vcc_t0_int_cnt = 0;
-	}
-}
 
 
 
@@ -83,11 +48,6 @@ void t3IntInit(void)
     EA = 1;
 	
 }
-
-
-
-
-
 
 
 

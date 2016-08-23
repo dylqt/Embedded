@@ -2,7 +2,6 @@
 #define _STC15_INT_H__
 
 #include "IAP15.h"
-#include "result.h"
 #include "stc15_oled.h"
 #include "stc15_uart.h"
 #include "power.h"

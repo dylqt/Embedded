@@ -3,7 +3,7 @@
 
 #include "iap15.h"
 #include "type.h"
-
+#include <string.h>
 
 /////////////////////////////////////////////////////////////
 // Uart1 (for indy)	//115200bps@22.1184MHz
@@ -47,13 +47,16 @@ extern xdata uint8 rec_data[500];
 extern uint16 rec_num;
 extern xdata   uint8   uart2_rec_data[201];
 extern uint8   uart2_rec_cnt;
+extern xdata   uint8   uart3_rec_data[200];
+extern uint8   uart3_rec_cnt;
 
 void SendData2(unsigned char dat);
 void SendString2(char *s);
 void Uart2Init(void);		//9600bps@22.1184MHz
-void uart2_sendMes(void);
+
 void clear_rec_data();	  //清空接收数据
 void clear_uart2_data();
+
 
 /////////////////////////////////////////////////////////
 // Uart3
@@ -80,6 +83,7 @@ extern bit busy3;
 void Uart3Init(void); 	//115200bps@22.1184MHz
 void SendData3(BYTE dat);
 void SendString3(char *s);
+void clear_uart3_data();
 
 
 //////////////////////////////////////////////////////////////
@@ -105,6 +109,8 @@ extern bit busy4;
 void Uart4Init(void);
 void SendData4(BYTE dat);
 void SendString4(char *s);
+void SendBuf4(char *uart3_rec_data, unsigned char uart3_rec_cnt);
+
 
 extern xdata   uint8   uart4_rec_data[200];
 extern uint8   uart4_rec_cnt;

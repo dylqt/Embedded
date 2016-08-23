@@ -1,6 +1,7 @@
 #include "stc15_pwm.h"
 //#include "stc15_time.h"
 #include "stc15_int.h"
+
 #define CCP_S0 0x10                 //P_SW1.4
 #define CCP_S1 0x20                 //P_SW1.5
 
@@ -68,32 +69,33 @@ void GetPwm()
 sfr PIN_SW2 =   0xba;
 
 /*
-功能: P4.4输出PWM波
+功能: P2.2输出PWM4波
 输入:
+	fre : 频率
 	DUTY : 占空比
 	10 : 10%
 */
-void GetPwm4(unsigned char DUTY)
+void GetPwm4(unsigned int fre)
 {
-
-    P4M0 = 0x00;
-    P4M1 = 0x00;	// 设置端口模式为准双向口
-    
+	unsigned int ALL = 22118 / fre;
+	//double left = (double)ALL / fre * 50;
+	//ALL = (unsigned int)left;
+    P2M1 &= ~(1 << 2);
+    P2M0 &= ~(1 << 2);	// 设置端口模式为准双向口
+	
+	
     PIN_SW2 |= 0x80;                //使能访问XSFR
     PWMCFG = 0x00;                  //配置PWM的输出初始电平为低电平
     PWMCKS = 0x00;                  //选择PWM的时钟为Fosc/(0+1)
-    PWMC = CYCLE;                   //设置PWM周期
+    PWMC = ALL;                   //设置PWM周期
     PWM4T1 = 0x0000;                //设置PWM4第1次反转的PWM计数
-    PWM4T2 = CYCLE * DUTY / 100;    //设置PWM4第2次反转的PWM计数
+    PWM4T2 = ALL  / 2;    //设置PWM4第2次反转的PWM计数
                                     //占空比为(PWM2T2-PWM2T1)/PWMC
-    PWM4CR = 0x08;                  //选择PWM4输出到P4.4,不使能PWM4中断
-
+    PWM4CR = 0x00;                  //选择PWM4输出到P4.4,不使能PWM4中断
 	
 	PWMCR |= 0x04;					//使能PWM4信号输出
     PWMCR |= 0x80;                  //使能PWM模块
     PIN_SW2 &= ~0x80;
-
-    while (1);
 }
 
 
@@ -215,7 +217,7 @@ void GetPwmBZ(unsigned char FRE, unsigned int DUTY)
 }
 
 /*
-功能: P2^2 PWM4输出PWM波	100HZ
+功能: P2^1 PWM3输出PWM波	100HZ
 输入:
 	DUTY : 占空比
 	10 : 10%
@@ -223,21 +225,21 @@ void GetPwmBZ(unsigned char FRE, unsigned int DUTY)
 void GetPwmBRT(unsigned char DUTY)
 {
 	float cycle = 27648;	// cycle = PWMC / (FOSC / ( 7 + 1 ))
-	P2M1 &= ~(1 << 2);
-	P2M1 &= ~(1 << 2);
+	P2M1 &= ~(1 << 1);
+	P2M1 &= ~(1 << 1);
 
 
 	PIN_SW2 |= 0x80;                //使能访问XSFR
     PWMCFG = 0x00;                  //配置PWM的输出初始电平为低电平
     PWMCKS = 0x07;                  //选择PWM的时钟为Fosc/(7+1)
     PWMC = cycle;                   //设置PWM周期		
-    PWM4T1 = 0x0000;                //设置PWM4第1次反转的PWM计数
-    PWM4T2 = cycle / 100 * DUTY;    //设置PWM4第2次反转的PWM计数
+    PWM3T1 = 0x0000;                //设置PWM3第1次反转的PWM计数
+    PWM3T2 = cycle / 100 * DUTY;    //设置PWM3第2次反转的PWM计数
                                     //占空比为(PWM2T2-PWM2T1)/PWMC
 									
-    PWM4CR = 0x00;                  //选择PWM4输出到P2.2,不使能PWM中断
+    PWM3CR = 0x00;                  //选择PWM3输出到P2.1,不使能PWM中断
 	
-	PWMCR |= 0x04;					//使能PWM4信号输出
+	PWMCR |= 0x02;					//使能PWM3信号输出
     PWMCR |= 0x80;                  //使能PWM模块
     PIN_SW2 &= ~0x80;
 	
@@ -321,6 +323,8 @@ void OledBrtAdjust(signed char way)
 			else 
 				break;
 		default:
+			OLED_BRT_DUTY = 50;
+			GetPwmBRT(OLED_BRT_DUTY);
 			break;
 	}
 }

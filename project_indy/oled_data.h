@@ -10,9 +10,9 @@ extern unsigned char code Fonts[];		// 5 * 7 字模， assic 从 32 - 127
 
 extern code unsigned char stateBase[48];	// 状态栏的不变部分
 extern code unsigned char stateBtConnect[2][6];	// 状态栏的蓝牙链接状态
-extern code unsigned char stateBattery[6][18];	// 状态栏的电池电量 从满到空
+extern code unsigned char stateBattery[7][18];	// 状态栏的电池电量 从满到空
 extern code unsigned char stateCharging[2][6];		// 状态栏的电池充电状态
-
+extern code unsigned char tempSymbol[16];			// 温度符号
 void OledFlushBaseState();
 
 /*
@@ -33,7 +33,7 @@ void OledBtConnectState(unsigned char state);
 void OledBatteryState(unsigned char batteryState);
 
 /*
-	功能 : 显示电量状态
+	功能 : 显示电量
 	输入 : 电量
 */
 char OledBatteryPower(unsigned char batteryPower);

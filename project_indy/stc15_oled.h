@@ -108,15 +108,15 @@ char OledWriteBufByHex(unsigned char *Data, unsigned char Num);
 		Page : 
 		Col : 最好6的倍数 
 */
-
 char OledWriteWordByHex57(unsigned char Page, unsigned char Col, unsigned char Data);
 
 /*
 	功能 : 使用5*7字模  输出HEX码的数据，最多输出64个数字，即32个字符
 	输入 : 数组数据
 */
-char OledWriteBufByHex57(unsigned char *str, unsigned char Num);
+char OledWriteBufByHex57index(unsigned char Page, unsigned char Col, unsigned char *str, unsigned char Num);
 
+char OledWriteBufByHex57(unsigned char *str, unsigned char Num);
 
 
 /*
@@ -137,7 +137,6 @@ char OledWriteAssic57(unsigned char Page, unsigned char Col,unsigned char Data);
 char OledAssicForState(unsigned char Page, unsigned char Col,unsigned char Data);
 
 
-
 /*
 	功能 : 使用5*7字模 输出ASSIC码的数据，最多输出80个字符
 	输入 : 字符串
@@ -151,4 +150,21 @@ void OledWriteMessage57(char *str);
 */
 char clearPageCol(unsigned char Page, unsigned char Col);
 
+/*
+	功能 : 在某行某列显示double型的数值
+	输入 : Page 和 Col 的位置，double的值
+*/
+unsigned char OledWriteDouble(unsigned char Page, unsigned char Col, double input);
+
+/*
+	功能 : 使用5*7字模  输出assic的数据，最多输出64个数字，即32个字符
+	输入 : 起始页和起始位置，数组数据
+*/
+char OledWriteBufByAssic57(unsigned char Page, unsigned char Col, unsigned char *arr, unsigned char Num);
+
+/*
+	功能 : 在某行某列显示温度符号
+	输入 : Page 和 Col 的位置
+*/
+char OledWriteTempSymbol(unsigned char Page, unsigned char Col);
 #endif

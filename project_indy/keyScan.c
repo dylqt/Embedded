@@ -8,42 +8,37 @@ unsigned char keyScan(void)
 	unsigned char keyValue = 0;
 	unsigned char keyValue1 = 0;
 	unsigned char keyValue2 = 0;
-	keyValue = read_adc256(3);
+	keyValue = getKeyAdc();
 
 	if(keyValue >= 205){
 		return S0_NO_INPUT;
 	}
 	else{
 		Delay10ms();
-		keyValue1 = read_adc256(3);
+		keyValue1 = getKeyAdc();
 		Delay10ms();
-		keyValue2 = read_adc256(3);
-		keyValue = (keyValue1 + keyValue2) / 2;
-
-		while(1)	// 等待按键放开
-		{	
-			Delay10ms();
-			if(read_adc256(3) > 205)
-				break;
-			else
-				SendData(read_adc256(3));
+		keyValue2 = getKeyAdc();
+		keyValue = (keyValue1 < keyValue2) ? keyValue1 : keyValue2;
+		if(keyValue >= 18){	// 只有TUCH键时支持连续触发
+			while(1)	// 等待按键放开
+			{	
+				Delay10ms();
+				if(getKeyAdc() > 205)
+					break;
+			}
 		}
 	}
 	
 	if(keyValue < 18){	    // S1 : tuch	0
-
 		click10msBZ();	
 		return S1_TUCH;
 	}else if(keyValue < 59){	// S2 : key+ 	36
-
 		click10msBZ();	
 		return S2_KEYP;
 	}else if(keyValue < 105){ // S3 : key-	82
-
 		click10msBZ();	
 		return S3_KEYM;
 	}else if(keyValue < 155){ // S4 : Mode	126
-
 		click10msBZ();	
 		return S4_MODE;
 	}else if(keyValue < 205){ // S5 : Enter	185			 
@@ -61,86 +56,45 @@ unsigned char keyScanTest(void)
 	unsigned char keyValue = 0;
 	unsigned char keyValue1 = 0;
 	unsigned char keyValue2 = 0;
-	keyValue = read_adc256(3);
-		if(keyValue >= 205)		//如果没有按键按下，继续等待
-			{
-				Delay10ms();	// 每10ms检测一次
-				SendString("NO : ");
-				SendData(0xff);
-				SendData(keyValue);
+	keyValue = getKeyAdc();
+	if(keyValue > 205)
+		return S0_NO_INPUT;
+	keyValue = 0;
+	Delay10ms();
+	keyValue1 = getKeyAdc();
+	Delay10ms();
+	keyValue2 = getKeyAdc();
+	keyValue = (keyValue1 < keyValue2) ? keyValue1 : keyValue2;
 	
-				SendString4("NO : ");
-				SendData(keyValue);
-				PWMCR &= ~0x20;					//关闭PWM7信号输出
+	
+//	keyValue = (keyValue1 + keyValue2) / 2;
 
-				return S0_NO_INPUT;
-			}
-		else{
-			Delay50ms();
-			keyValue1 = read_adc256(3);
-			Delay10ms();
-			keyValue2 = read_adc256(3);	
-
-			keyValue = (keyValue1 + keyValue2) / 2;
+//	OledWriteDouble(1,1, keyValue);
+	
+	if(keyValue < 30){	    // S1 : tuch	0
+		click10msBZ();
 		
-			if(keyValue < 18){	    // S1 : tuch	0
-				SendString("S1 : ");
-				SendData(0xff);
-				SendData(keyValue);
+		return S1_TUCH;
+	}else if(keyValue < 59){	// S2 : key+ 	36
+		click10msBZ();
+
+		return S2_KEYP;
+	}else if(keyValue < 115){ // S3 : key-	82
+		click10msBZ();
+
+		return S3_KEYM;
+	}else if(keyValue < 165){ // S4 : Mode	126
+		click10msBZ();
+
+		return S4_MODE;
+	}else if(keyValue < 205){ // S5 : Enter	185
+		click10msBZ();	// if  keyValue > 205 means no Key input 
+		
+		return S5_ENTER;
+	}
+	else
+		return S0_NO_INPUT;
 	
-				SendString4("S1 : ");
-				SendData(keyValue);
-	
-				GetPwmBZ(1, 60);
-				
-				return S1_TUCH;
-			}else if(keyValue < 59){	// S2 : key+ 	36
-				SendString("S2 : ");
-				SendData(0xff);
-				SendData(keyValue);
-	
-				SendString4("S1 : ");
-				SendData(keyValue);
-	
-				GetPwmBZ(2, 60);
-	
-				return S2_KEYP;
-			}else if(keyValue < 105){ // S3 : key-	82
-				SendString("S3 : ");
-				SendData(0xff);
-				SendData(keyValue);
-				
-				SendString4("S3 : ");
-				SendData(keyValue);
-	
-				GetPwmBZ(3, 60);
-	
-				return S3_KEYM;
-			}else if(keyValue < 155){ // S4 : Mode	126
-				SendString("S4 : ");
-				SendData(0xff);
-				SendData(keyValue);
-	
-				SendString4("S3 : ");
-				SendData(keyValue);
-	
-				GetPwmBZ(4, 60);
-	
-				return S4_MODE;
-			}else if(keyValue < 205){ // S5 : Enter	185
-				SendString("S5 : ");
-				SendData(0xff);
-				SendData(keyValue);
-	
-				SendString4("S3 : ");
-				SendData(keyValue);
-				GetPwmBZ(0, 60);	// if  keyValue > 205 means no Key input 
-				
-				return S5_ENTER;
-			}
-			else
-				return S0_NO_INPUT;
-		}
 }
 
 
