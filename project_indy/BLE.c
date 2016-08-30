@@ -192,6 +192,9 @@ unsigned char bleParseData(void)
 	int cmdStart = 0;	// 命令开始
 	int fredata = 0;
 	int powdata = 0;
+
+	uint16 code1_rec = 0, temp1_rec = 0, code2_rec = 0, temp2_rec = 0;
+	
 	if(uart3_rec_cnt == 0)
 		return 0;
 	for(; from < uart3_rec_cnt; from++){
@@ -214,12 +217,14 @@ unsigned char bleParseData(void)
 						bleRecvState.recState = SUC;
 						switch (uart3_rec_data[cmdIndex])	// 判断命令类型
 						{
+
 							case HAND:	// 握手
 								rec = 1;	// 数据正确
 							//	bleSendData(HAND, NULL, 1, bleRecvState.recState);
 								bleSendData(HAND, NULL, 1, bleRecvState.recState);
 								beep100msBZ();
 								break;
+
 							case ENREAD:	// 允许单片机发送数据位
 								rec = 1;	// 收到数据								
 								if(uart3_rec_data[cmdStart] == 1 || uart3_rec_data[cmdStart] == 0){
@@ -230,6 +235,7 @@ unsigned char bleParseData(void)
 									bleRecvError(ENREAD);
 								}
 								break;
+
 							case MOREINFO:	// 显示更多信息
 								rec = 1;
 								if(uart3_rec_data[cmdStart] == 0 || uart3_rec_data[cmdStart] == 1){
@@ -240,6 +246,7 @@ unsigned char bleParseData(void)
 									bleRecvError(MOREINFO);
 								}
 								break;
+
 							case SETINDYFRE :	// 设置频率
 								rec = 1;
 								fredata = (uart3_rec_data[cmdStart + 2] << 8 | uart3_rec_data[cmdStart + 3]);
@@ -256,6 +263,7 @@ unsigned char bleParseData(void)
 									bleRecvError(SETINDYFRE);
 								}
 								break;
+
 							case SETINDYPOWER:	// 设置功率
 								rec = 1;
 								powdata = (uart3_rec_data[cmdStart] << 8 | uart3_rec_data[cmdStart + 1]);
@@ -270,12 +278,59 @@ unsigned char bleParseData(void)
 									bleRecvError(SETINDYPOWER);
 								}
 								break;
+
 							case SETSTATUS:	// 进入设置界面
 								rec = 1;
 								bleSendData(SETINDYFRE, bleState.fre, 4, bleRecvState.recState);
 								bleSendData(SETINDYPOWER, bleState.power, 2, bleRecvState.recState);
 								break;
-								
+
+							case SETBIAODING: 	// 设置标定信息
+								rec = 1;
+								code1_rec = (uart3_rec_data[cmdStart] << 8) | uart3_rec_data[cmdStart + 1];
+								temp1_rec = (uart3_rec_data[cmdStart + 2] << 8) | uart3_rec_data[cmdStart + 3];
+								code2_rec = (uart3_rec_data[cmdStart + 4] << 8) | uart3_rec_data[cmdStart + 5];
+								temp2_rec = (uart3_rec_data[cmdStart + 6] << 8) | uart3_rec_data[cmdStart + 7];
+
+								indySetBD(code1_rec, temp1_rec, code2_rec, temp2_rec, 0);
+/*
+								SendData4(uart3_rec_data[cmdStart]);
+								SendData4(uart3_rec_data[cmdStart + 1]);
+								SendData4(uart3_rec_data[cmdStart + 2]);
+								SendData4(uart3_rec_data[cmdStart + 3]);
+								SendData4(uart3_rec_data[cmdStart + 4]);
+								SendData4(uart3_rec_data[cmdStart + 5]);
+								SendData4(uart3_rec_data[cmdStart + 6]);
+								SendData4(uart3_rec_data[cmdStart + 7]);
+*/							
+								Delay100ms();
+								indyGetBD();	// 读取标定命令
+								bleState.biaoding[0] = (CODE1 & 0xff00) >> 8;
+								bleState.biaoding[1] = CODE1 & 0xff;
+								bleState.biaoding[2] = (TEMP1 & 0xff00) >> 8;
+								bleState.biaoding[3] = TEMP1 & 0xff;
+								bleState.biaoding[4] = (CODE2 & 0xff00) >> 8;
+								bleState.biaoding[5] = CODE2 & 0xff;
+								bleState.biaoding[6] = (TEMP2 & 0xff00) >> 8;
+								bleState.biaoding[7] = TEMP2 & 0xff;															
+								bleSendData(SETBIAODING, bleState.biaoding, 8, bleRecvState.recState);
+									
+								break;
+
+							case GETBIAODING: 	// 读取标定信息
+								rec = 1;				
+								indyGetBD();	// 读取标定命令
+								bleState.biaoding[0] = (CODE1 & 0xff00) >> 8;
+								bleState.biaoding[1] = CODE1 & 0xff;
+								bleState.biaoding[2] = (TEMP1 & 0xff00) >> 8;
+								bleState.biaoding[3] = TEMP1 & 0xff;
+								bleState.biaoding[4] = (CODE2 & 0xff00) >> 8;
+								bleState.biaoding[5] = CODE2 & 0xff;
+								bleState.biaoding[6] = (TEMP2 & 0xff00) >> 8;
+								bleState.biaoding[7] = TEMP2 & 0xff;
+								bleSendData(GETBIAODING, bleState.biaoding, 8, bleRecvState.recState);
+								break;
+
 							default:	// 目前没有的命令								
 								bleRecvError(BLANK);
 								break;

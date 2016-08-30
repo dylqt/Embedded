@@ -29,6 +29,7 @@ struct state{
 };
 
 extern struct state workState;
+sbit batteryCharge = P0^7;
 
 // Ë¢ÐÂµç³ØµÄ×´Ì¬
 void freshBatteryState();

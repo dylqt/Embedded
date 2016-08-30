@@ -15,9 +15,9 @@ int main()
 	unsigned char i = 0;
 	unsigned char j = 0;
 
-	unsigned char bat = 0;
-	double batteryValue = 0;
-
+	unsigned char batCnt = 0;
+	int batteryValue = 0;
+	
 //	unsigned char id[12] = {1,2,3,4,5,6,7,8,9,'a','b','c'};
 //	unsigned char temp[2] = {31, 23};
 //	unsigned char sen[2] = {12, 13};
@@ -93,12 +93,28 @@ int main()
 	//OledAssicForState(0,90,'*');	
 	while(1)
 		{	
-			WDT_CONTR |= 0X37;//使能看门狗。128分频，喂狗时间大约2.6S.
+			//indySetBD(1001, 1002, 1003, 1004, 0);
+			// WDT_CONTR |= 0X37;//使能看门狗。128分频，喂狗时间大约2.6S.
 			bleParseData();	// 对蓝牙收到的数据进行解析
 			
 			clear_mes_body();
 		 	Delay50ms();
+			//getBatteryPercent();
+			//batteryScan();
+
 			
+			// 发送电量信息给蓝牙
+			batCnt++;
+			if(batCnt >= 20){	// 50ms * 20 = 1s;发送一次电量
+				batCnt = 0;		
+				if(bleState.moreInfor == 1){							
+					 bleState.battery[0] = batteryCharge;	// 充电状态；检测P07
+					 bleState.battery[1] = getBatteryPercent();	// 得到电量的百分比
+					bleSendData(BATTERY, bleState.battery, 2, SUC);
+				}
+			}
+			
+			// 按键扫描
 			keyScanResult = keyScan();
 	 		
 			if(keyScanResult == S0_NO_INPUT){ // 过一段时间清除OLED
@@ -119,10 +135,10 @@ int main()
 			else if(keyScanResult == S5_ENTER){	// 开
 				if(death_ctron == 0){
 					System_Power_Vcc_ON_OFF = 1;
-					death_ctron = 1;
-					OledPowerUp();
-					
-					beep200msBZ();
+					death_ctron = 1;	
+					ble_init();	// 默认透传模式
+					beep200msBZ();	// 重启提示
+					OledPowerUp();	
 					OledClear();
 					OledWriteMessage57("init... ");
 					indyInitCh875();
@@ -137,7 +153,10 @@ int main()
 									if(bleState.moreInfor == 1)
 										indy_readall();		// 读所有
 									else
+										{
+										indyGetBD();
 										indy_readtemp();	//temp
+										}
 										break;
 
 								case S2_KEYP: 

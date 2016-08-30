@@ -26,10 +26,10 @@
 // getCode 为我们自己读到的值
 // TEMP2 、TEMP1 = temp * 10 + 800
 // CODE2 、CODE1 分别为TEMP2和TEMP1时读到的CODE值
-extern double TEMP2;
-extern double TEMP1;
-extern double CODE2;
-extern double CODE1;
+extern uint16 TEMP2;
+extern uint16 TEMP1;
+extern uint16 CODE2;
+extern uint16 CODE1;
 
 typedef struct  uart2_body
 {
@@ -76,5 +76,12 @@ void indySetFre(unsigned char channel, unsigned char state, unsigned int fre);
 void indySetPower(unsigned int power);
 
 void indy_readall();
+
+
+// 设置标定信息
+void indySetBD(uint16 code1, uint16 temp1, uint16 code2, uint16 temp2, uint16 vl);
+	
+// 读取标定信息
+void indyGetBD();
 
 #endif

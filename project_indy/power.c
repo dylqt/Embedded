@@ -1,13 +1,15 @@
 #include "power.h"
 
 #define STDVCC 4.2		// 标准电压4.2v
-#define STABLEV 2.498	// 稳定电压值1.27v
+#define STABLEV 2.459	// 稳定电压值2.459v
 
 unsigned char getBatteryTimes = 10;
 
 unsigned char System_Power_Vcc_State = 0;
 unsigned char VSEL_State = 0;
 unsigned char BYP_State = 0;
+
+sbit batteryChargeState = P0^7;
 
 struct state workState; 
 
@@ -101,7 +103,6 @@ void batteryInit(void)
 /*
 	功能 读取电压
 	分辨率1024，标准电压1.27v
-	采集10次，取中间3次平均
 */ 
 double batteryScan(void)
 {	
@@ -139,17 +140,18 @@ double batteryScan(void)
 
 	
 	// 自己采集10次
-	for(; i < 10; i++){
+	/*for(; i < 10; i++){
 		batteryValuetmp = read_adc256(4);
-		if(batteryValuetmp > batteryValue)
+		if(batteryValuetmp < batteryValue)
 			batteryValue = batteryValuetmp;
 		Delay3us();
-	}
+	}*/
 
+	batteryValue = read_adc256(4);
 	
 	realBatteryValue = STABLEV * 256 / batteryValue;
 
-	left = realBatteryValue * 100 - (unsigned int)(realBatteryValue) * 100;
+//	left = realBatteryValue * 100 - (unsigned int)(realBatteryValue) * 100;
 
 //	SendData4(0xff);
 //	SendData4(batteryValue);
@@ -159,7 +161,7 @@ double batteryScan(void)
 //	SendData4(left);		
 
 
-	return realBatteryValue + 0.13;	// 补偿0.13v
+	return realBatteryValue;	// 补偿0.13v
 
 }
 
@@ -169,19 +171,19 @@ unsigned char getBatteryPercent()
 //	char output[20] = {0};
 	unsigned char batteryPercentage = 0;
 	double batteryValue = batteryScan();
-
+	int tmp = 0;
 	
 	if(batteryValue != 0){
 		
-		batteryPercentage = (batteryValue - 2.7) * 100.0 / (STDVCC - 2.7);
+		batteryPercentage = (batteryValue - 2.6) * 100.0 / (STDVCC - 2.6);
 
-//		sprintf(output, "BAT %d\% \n ", batteryPercentage);
-//		SendData4(0xbb);
-//		SendData4(batteryValue);
-		
-//		SendData4((unsigned char)batteryPercentage);
-//		SendString4(output);
-//		WriteTestMessage57(output);
+		//SendData4(0xbb);
+		//tmp = batteryValue * 100;
+		//SendData4((tmp & 0xff00) >> 8);
+		//SendData4(tmp & 0xff);
+		//SendData4((unsigned char)batteryPercentage);
+
+
 		return (unsigned char)batteryPercentage;
 		}
 	else

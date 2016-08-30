@@ -74,15 +74,20 @@ struct BLESTATE{
 	unsigned char moreInfor;	// 更多数据
 	unsigned char fre[4];	// 当前频率
 	unsigned char power[2];	// 当前功率
+	unsigned char battery[2]; 	// 当前的电池电量
+	unsigned char biaoding[8]; 	// 当前标定的值；CODE1 TEMP1 CODE2 TEMP2 
 }; 
 
-// 蓝牙接收到的命令
+// APP发送的命令、蓝牙接收到的命令
 #define HAND 2
 #define ENREAD 7
 #define MOREINFO 8
 #define SETINDYFRE 9
 #define SETINDYPOWER 10
 #define SETSTATUS 11
+#define SETBIAODING 14	// 设置标定温度的4个值
+#define GETBIAODING 15	// 获取标定温度的4个值
+
 // 返回给蓝牙的命令
 #define BLANK 0
 #define ID 3
@@ -90,7 +95,8 @@ struct BLESTATE{
 #define	SENSORCODE 5
 #define	RSSI 6
 #define SENDSTATE 7
-
+#define BATTERY 12
+#define TEMPCODE 13
 
 
 extern struct BLERECVSTATE bleRecvFlag;

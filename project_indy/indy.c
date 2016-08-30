@@ -4,10 +4,10 @@ char rec_flag  =   -1;     //接收到耳标信号标志。-1没接受到。0接受到
 unsigned char  rec_flag_cnt = 0;   //接收到耳标信息计数。如果接收到一次，则认为读取正常。
 xdata   UART2_BODY  mes_body;
 
-double TEMP2 = 1600;
-double TEMP1 = 1008;
-double CODE2 = 2619;
-double CODE1 = 2186;        
+uint16 TEMP2 = 1600;
+uint16 TEMP1 = 1008;
+uint16 CODE2 = 2619;
+uint16 CODE1 = 2186;        
 void write_mac_register(uint16 addr,uint16 w_data,uint16 w_data_l)
 {
 
@@ -98,10 +98,11 @@ void process_packets()
 	uint16 epc_data_addr = 0;   //epc数据的起始地址
 	uint16 sensor_data_addr = 0;   //sensor_code数据起始地址
 
-	uint8 check_data=0;
+	uint8 check_data=0;	// 判断数据是否全为0; 如果全为0则不显示
 	bit check_con1 = 0;
 	bit check_con2 = 0;
 
+	
 	unsigned char bleVal[2] = {0};
     uint8   pkt_flag = 0;
 
@@ -130,7 +131,7 @@ void process_packets()
 		if(cmd_type == 0x0005)
 		{ 
 			epc_data_addr = data_addr_fir+14;
-
+			check_data = 0;
             for(i = 0;i < 12;i++)
             { 
                 //epc_code[i] = rec_data[epc_data_addr + i];//epc
@@ -138,33 +139,45 @@ void process_packets()
 
 				check_data |= mes_body.epc_code[i];	// 如果全为0则不显示
             } 
-
-			
-			if(mes_body.epc_code[1] == 0x8b){
+			switch(mes_body.epc_code[1]){
+			case 0x8a:
+				TEMP2 = 1252;
+				CODE2 = 2423;
+				TEMP1 = 1133;
+				CODE1 = 2340;
+				break;
+			 case 0x15:
+				TEMP2 = 1290;
+				CODE2 = 2514;
+				TEMP1 = 1123;
+				CODE1 = 2368;
+				break;			
+			case 0x8b:
 				TEMP2 = 1257;
 				CODE2 = 2388;
 				TEMP1 = 1171;
 				CODE1 = 2321;
-			//	OledAssicForState(0,32, '1');
-			}
-			else if(mes_body.epc_code[1] == 0x8c){
+				break;
+			case 0x8c:
 				TEMP2 = 1235;
 				CODE2 = 2403;
 				TEMP1 = 1175;
 				CODE1 = 2352;
-			//	OledAssicForState(0,32, '2');
-			}else if(mes_body.epc_code[1] == 0x5f){
+				break;
+			case 0x5f:
 				TEMP2 = 1263;
 				CODE2 = 2409;
 				TEMP1 = 1113;
 				CODE1 = 2317;
-			//	OledAssicForState(0,32, '3');
-			}else if(mes_body.epc_code[1] == 0x64){
+				break;
+			case 0x64:
 				TEMP2 = 1258;
 				CODE2 = 2442;
 				TEMP1 = 1115;
 				CODE1 = 2337;	
-			//	OledAssicForState(0,32, '4');
+				break;
+			default:
+				break;
 			}
 
 			
@@ -182,8 +195,8 @@ void process_packets()
 		}
 	    if(cmd_type == 0x0006)
 	    {
-     
-            if(pkt_flag == 0x00)
+      	
+            if(pkt_flag == 0x00)	
             {    
             
                 if(rec_data[data_addr_fir + 4] == 0xc2)
@@ -193,24 +206,27 @@ void process_packets()
 
                     switch(mes_body.cmd_type)
     			    {
-    					case 1:
+    					case 1:	// 温度
+							check_data = 0;
+							lowBattery50msBZ();	// 读到温度提示
     						for(i=0; i<2; i++)
     					    {
                                 mes_body.val_data[i] = rec_data[sensor_data_addr +  i];
-    							
+    							check_data |= mes_body.val_data[i];
     					    }
-							lowBattery50msBZ();
-							OledWriteWordByHex57(4, 52, mes_body.val_data[0]);
-							OledWriteWordByHex57(4, 68,mes_body.val_data[1]);
-
-
+							if(check_data == 0)
+								break;
+							
 							input |= mes_body.val_data[0] << 8;
 							input |= mes_body.val_data[1];
 
 							if(( (input < CODE1) && (CODE1 - input > 100) ) || ( (input > CODE2) && (input - CODE2 > 100) ))
 								break;	// 当温度离开温度区间10度时认为是错误数据
-							output = ((TEMP2 - TEMP1) / (CODE2 - CODE1) * ( input - CODE1) + TEMP1 - 800) / 10.0;
-   					    	
+							output = (1.0 * (TEMP2 - TEMP1) / (CODE2 - CODE1) * ( input - CODE1) + TEMP1 - 800) / 10.0;
+
+							// oled显示							
+							OledWriteWordByHex57(4, 52, mes_body.val_data[0]);
+							OledWriteWordByHex57(4, 68,mes_body.val_data[1]);
 							OledWriteBufByAssic57(3, 0, "temp:", 5);
 							OledWriteDouble(4, 0, output);
 							OledWriteTempSymbol(4,30);
@@ -221,35 +237,35 @@ void process_packets()
 			 					bleVal[0] = (unsigned char) output;
 								bleVal[1] = (output - (double)bleVal[0]) * 100;
 			 					bleSendData(TEMP, bleVal, 2, SUC);
+								
+								//if(bleState.moreInfor == 1){
+									bleSendData(TEMPCODE, mes_body.val_data, 2, SUC);
+								//}	
 							}
+							
     						break;
-    					case 2:
+    					case 2:	// sensor code
+    					
+							check_data = 0;
     						for(i=0; i<2; i++)
     					    {
     							mes_body.val_data[i] = rec_data[sensor_data_addr +  i];
-    							//OledWriteWordByHex(1, 0, 0xdd);
+    							check_data |= mes_body.val_data[i];
     					    }
+							if(check_data == 0)
+								break;
 							if(bleState.enSend == ENABLE)
 			 					bleSendData(SENSORCODE, mes_body.val_data, 2, SUC);
-							//lowBattery50msBZ();
-							//OledWriteWordByHex(3, 0, mes_body.val_data[0]);
-							//OledWriteWordByHex(3, 16,mes_body.val_data[1]);
-							//Delay999ms();
 							
-    						//rec_flag_cnt++;
     						break;
-    					case 3:
+    					case 3:	// rssi
                             mes_body.val_data[0] = 0;
                             mes_body.val_data[1] = rec_data[sensor_data_addr +  1];
-							
-							//lowBattery50msBZ();
-							//OledWriteWordByHex(3, 0, mes_body.val_data[0]);
-							//OledWriteWordByHex(3, 16,mes_body.val_data[1]);
-							//Delay999ms();
+					
 							
 							if(bleState.enSend == ENABLE)
 			 					bleSendData(RSSI, mes_body.val_data, 2, SUC);
-    						//rec_flag_cnt++;
+    					
     						break;
     					default : 
                             rec_flag    =   READ_NO_TAG;
@@ -257,16 +273,19 @@ void process_packets()
                             break;
     				}      
                 }
-                else
-                {
-					// debug
-                    //SendString2("NOT  Read CMD\n");
-					//OledWriteWordByHex(1, 0, 0x22);
-                }
-               
-               
-
+            	 else{
+				}   
+				
+				
             }
+			else if(pkt_flag == 0x80)	// 温度校准数据
+                {
+                	click10msBZ(); // 读到温度提示
+                	CODE1 = rec_data[data_addr_fir + 12] << 4 | ((rec_data[data_addr_fir + 13] & 0xf0) >> 4);
+					TEMP1 = ((rec_data[data_addr_fir + 13] & 0x0f) << 7) | ((rec_data[data_addr_fir + 14] & 0xfe) >> 1);
+					CODE2 = ((rec_data[data_addr_fir + 14] & 1) << 11) | (rec_data[data_addr_fir + 15] << 3) | ((rec_data[data_addr_fir + 16] & 0xE0) >> 5);
+					TEMP2 = ((rec_data[data_addr_fir + 16] & 0x1f) << 6) | ((rec_data[data_addr_fir + 17] & 0xfc) >> 2);
+                }
             else
             {
                 //if(pkt_flag && 0x01)
@@ -319,6 +338,7 @@ void indy_read_sensorcode()
     //int j;
     //char i;
     clear_rec_data();
+	clear_mes_body();
     mes_body.cmd_type = 2;
     write_mac_register(0x0a02,0x0000,0x0000);
 	write_mac_register(0x0a03,0x0000,0x000C);
@@ -345,6 +365,7 @@ void indy_readrssi()
      //int j;
      //char i;
     clear_rec_data();
+	clear_mes_body();
     mes_body.cmd_type = 3;
     write_mac_register(HST_TAGACC_BANK,0x0000,0x0000);
 	write_mac_register(HST_TAGACC_PTR,0x0000,0x000d);
@@ -370,13 +391,14 @@ void indy_readrssi()
 void indy_readtemp()
 {
 	
-    int rec_cnt = 0;
-   // int i;
+    //int rec_cnt = 0;
+   	// int i;
 	// SendString2(" indy_readtemp start \r\n");
     //for(i = 0;i < 5;i++)
     //{
-    mes_body.cmd_type = 1;
     clear_rec_data();
+    clear_mes_body();
+    mes_body.cmd_type = 1;
     write_mac_register(HST_TAGACC_BANK,0x0000,0x0000);
     write_mac_register(HST_TAGACC_PTR,0x0000,0x000e);
     write_mac_register(HST_TAGACC_CNT,0x0000,0x0002);
@@ -405,7 +427,7 @@ void indy_readall()
 
 	//bleSendData(SENSORCODE, temp, 2, SUC);
 	//bleSendData(RSSI, temp, 2, SUC);
-
+	indyGetBD();
 	indy_readtemp();
 	indy_read_sensorcode();
 	indy_readrssi();
@@ -1663,8 +1685,8 @@ SendData(0x01); SendData(0x00); SendData(0x03); SendData(0x0c); SendData(0xac); 
 // SendData(0x01); SendData(0x00); SendData(0x03); SendData(0x0c); SendData(0x34); SendData(0x0d); SendData(0x18); SendData(0x00);Delay20ms();
 bleState.fre[0] = 0;
 bleState.fre[1] = 1;
-bleState.fre[2] = (845 & 0xff00) >> 8;
-bleState.fre[3] = 845 & 0xff;
+bleState.fre[2] = (875 & 0xff00) >> 8;
+bleState.fre[3] = 875 & 0xff;
 
 SendData(0x01); SendData(0x00); SendData(0x04); SendData(0x0c); SendData(0x00); SendData(0x01); SendData(0x07); SendData(0x14);Delay20ms();
 	
@@ -1989,4 +2011,84 @@ void indySetPower(unsigned int pow)
 	
 	SendData(0x01);SendData(0x00);SendData(0x07);SendData(0x07);SendData(0x00);SendData(0x20);SendData(0x00);SendData(0x00);Delay20ms();
 	SendData(0x01);SendData(0x00);SendData(0x12);SendData(0x0B);SendData(0xff);SendData(0xFF);SendData(0x0f);SendData(0x00);Delay20ms();
+}
+
+
+// 设置标定信息
+void indySetBD(uint16 code1, uint16 temp1, uint16 code2, uint16 temp2, uint16 vl){
+	unsigned char addr9[2] = {0};
+	unsigned char addra[2] = {0};
+	unsigned char addrb[2] = {0};
+
+	addr9[0] = (code1 & 0x0ff0) >> 4;	// 地址9的高位
+	addr9[1] = ((code1 & 0x0f) << 4) | ((temp1 & 0x0780) >> 7); 	// 地址9的低位
+	addra[0] = ((temp1 & 0x7f) << 1) | ((code2 & 0x0800) >> 11);	// 地址a的高位
+	addra[1] = (code2 & 0x07f8) >> 3;	// 地址a的低位
+	addrb[0] = ((code2 & 0x07) << 5) | ((temp2 & 0x07c0) >> 6);	// 地址b的高位
+	addrb[1] = ((temp2 & 0x3f) << 2) | (vl & 0x03);	// 地址b的低位
+
+	SendData(0x01);SendData(0x00);SendData(0x03);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x01);SendData(0x0a);SendData(0x07);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x02);SendData(0x0a);SendData(0x03);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x04);SendData(0x0a);SendData(0x01);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x08);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+
+	SendData(0x01);SendData(0x00);SendData(0x09);SendData(0x0a);SendData(addr9[1]);SendData(addr9[0]);SendData(0x09);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x06);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x00);SendData(0xf0);SendData(0x11);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	
+	SendData(0x01);SendData(0x00);SendData(0x03);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x01);SendData(0x0a);SendData(0x07);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x02);SendData(0x0a);SendData(0x03);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x04);SendData(0x0a);SendData(0x01);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x08);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+
+	SendData(0x01);SendData(0x00);SendData(0x09);SendData(0x0a);SendData(addra[1]);SendData(addra[0]);SendData(0x0a);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x06);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x00);SendData(0xf0);SendData(0x11);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	
+	SendData(0x01);SendData(0x00);SendData(0x03);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x01);SendData(0x0a);SendData(0x07);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x02);SendData(0x0a);SendData(0x03);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x04);SendData(0x0a);SendData(0x01);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x08);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+/*
+	SendData(0x01);SendData(0x00);SendData(0x09);SendData(0x0a);SendData(addrb[1]);SendData(addrb[0]);SendData(0x0b);SendData(0x00);
+	SendData(0x01);SendData(0x00);SendData(0x06);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);
+	SendData(0x01);SendData(0x00);SendData(0x00);SendData(0xf0);SendData(0x11);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+*/
+	SendData(0x01);SendData(0x00);SendData(0x09);SendData(0x0a);SendData(addrb[1]);SendData(addrb[0]);SendData(0x0B);SendData(0x00);Delay20ms();
+	SendData(0xf8);SendData(0x01);SendData(0x00);SendData(0x06);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x00);SendData(0x00);SendData(0x08);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x00);SendData(0xf0);SendData(0x11);SendData(0x00);SendData(0x00);SendData(0x00);Delay20ms();
+
+}
+
+
+// 读取标定信息
+void indyGetBD(){
+	clear_rec_data();
+
+	SendData(0x01);SendData(0x00);SendData(0x11);SendData(0x09);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);
+	//Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x02);SendData(0x0a);SendData(0x03);SendData(0x00);SendData(0x00);SendData(0x00);
+	//Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x03);SendData(0x0a);SendData(0x09);SendData(0x00);SendData(0x00);SendData(0x00);
+	//Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x04);SendData(0x0a);SendData(0x03);SendData(0x00);SendData(0x00);SendData(0x00);
+	//Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x06);SendData(0x0a);SendData(0x00);SendData(0x00);SendData(0x00);SendData(0x00);
+	//Delay20ms();
+	SendData(0x01);SendData(0x00);SendData(0x00);SendData(0xf0);SendData(0x10);SendData(0x00);SendData(0x00);SendData(0x00);
+	Delay20ms();
+
+	if(rec_data[0]	== 0x01	)
+	{	       	
+		Delay20ms();
+		ES = 0;
+		process_packets();	 //处理数据
+		ES = 1;
+	}	
+
+	
 }
